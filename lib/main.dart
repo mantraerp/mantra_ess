@@ -5,8 +5,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 import 'Global/constant.dart';
+import 'dart:io';
+
+
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
+
   runApp(MaterialApp (
     title: "Mantra",
     home: const LaunchScreen(),

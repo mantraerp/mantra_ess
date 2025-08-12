@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/webService.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'constant.dart';
 
 
@@ -119,5 +121,77 @@ Widget imageLoadingHeightWidth(String imageLink, double height, double width) {
       errorWidget: (context, url, error) => const Icon(Icons.error),
       fit: BoxFit.contain,
       useOldImageOnUrlChange:true
+  );
+}
+
+
+
+void showAlert(String title, String message) {
+
+  var alertStyle = AlertStyle(
+      animationType: AnimationType.grow,
+      isCloseButton: false,
+      isOverlayTapDismiss: false,
+      descStyle:const TextStyle(
+          fontFamily: '',
+          fontSize: 17,
+          color: appGray
+      ),
+      descTextAlign: TextAlign.center,
+      animationDuration: const Duration(milliseconds: 250),
+      alertBorder: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
+        side: const BorderSide(
+          color: appMantraBlue,
+        ),
+      ),
+      titleStyle: const TextStyle(
+        fontFamily: '',
+        fontSize: 14,
+        color: appGray,
+      ),
+      alertAlignment: Alignment.center,
+      constraints: const BoxConstraints(
+        minHeight: 50.0,
+      )
+  );
+
+  Alert(
+    context: navigatorKey.currentContext!,
+    type: AlertType.none,
+    style:alertStyle,
+    title: title,
+    desc: message,
+    buttons: [
+      DialogButton(
+          color:appMantraBlue,
+          onPressed: () {
+            Navigator.pop(navigatorKey.currentContext!);
+          },
+          width: 100,
+          child: mantraLabel('ok', 18,appGray, TextAlign.left, FontWeight.w500, 1)
+      )
+    ],
+  ).show();
+}
+
+Widget appButtonGray(String title, VoidCallback? onPressed,AlignmentGeometry alignment, double width, double height){
+  return Container(
+    padding: const EdgeInsets.only(left: 0,right: 0),
+    height: height,
+    width: width,
+    child: TextButton(
+      clipBehavior: Clip.none,
+      style: ButtonStyle(
+        alignment: alignment,
+        backgroundColor: WidgetStateProperty.all<Color>(const Color.fromARGB(0,0, 0, 0)),
+        foregroundColor:WidgetStateProperty.all<Color>(const Color.fromARGB(0,0, 0, 0)),
+        overlayColor:WidgetStateProperty.all<Color>(const Color.fromARGB(0,0, 0, 0)),
+        shadowColor:WidgetStateProperty.all<Color>(const Color.fromARGB(0,0, 0, 0)),
+        surfaceTintColor:WidgetStateProperty.all<Color>(const Color.fromARGB(0,0, 0, 0)),
+      ),
+      onPressed: onPressed,
+      child: mantraLabel(title, 14,appGray, TextAlign.center, FontWeight.w500, 1)
+    ),
   );
 }

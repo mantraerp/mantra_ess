@@ -1,9 +1,9 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mantra_ess/Global/AppWidget.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/constant.dart';
+import 'package:mantra_ess/Login/OTPPage.dart';
 
 
 class loginPage extends StatefulWidget {
@@ -36,6 +36,7 @@ class _loginPageState extends State<loginPage> {
     // }
 
     txtEmail.text="ravi.patel@mantratec.com";
+    txtPassword.text="Mantra1988*";
 
 
     // String phoneNumber = prefsGloble.getString(NUDBDPhoneNumber)!;
@@ -72,7 +73,7 @@ class _loginPageState extends State<loginPage> {
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         children: <Widget> [
           const SizedBox(height: 40.0),
-          Image.asset('assets/MantraLogo.png',width: deviceWidth,height: 140.0),
+          Image.asset('assets/MantraLogo.png',width: deviceWidth,height: 120.0),
           const SizedBox(height: 30.0),
           TextFormField(
             controller: txtEmail,
@@ -193,7 +194,7 @@ class _loginPageState extends State<loginPage> {
                 // }
                 // else
                 // {
-                  actLoginCall(context);
+                      actLoginCall(context);
                 // }
               },
               child:serviceCall ?
@@ -227,6 +228,12 @@ class _loginPageState extends State<loginPage> {
       serviceCall = false;
       if (response)
       {
+
+        Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (
+                  context) => OTPPage()));
+
         // deskGetEmployeeDetail().then((response)
         // {
         //   extraDataGloble.clear();

@@ -24,7 +24,7 @@ const String ScreenDashboard = '/DashboardPage';
 const String NUDMantraEmail = "nudMantraEmail";
 const String NUDMantraPass = "nudMantraPass";
 
-const String NUDMantraUserName = "nudMantraUserName";
+const String NUDMantraTempID = "nudMantraTempID";
 
 
 /* Colour */
@@ -32,9 +32,10 @@ const Color appWhite = Colors.white;
 const Color appGray = Color.fromARGB(255, 76, 92, 101);
 const Color appBlack = Colors.black;
 const Color appGrayDark = Color.fromARGB(255, 110, 110, 109);//Text Colour
+const Color appMantraBlue = Colors.black;
 
 /* Image */
-const String IMGLoader = "";
+const String IMGLoader = "assets/MantraLogo.png";
 
 /* Message */
 const String Msg_InternetConnection = 'Check your internet connection';

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <!-- The domain(s) your app should trust with the custom CA -->
+        <domain includeSubdomains="true">mantratec.milaap.ai</domain>
+
+        <!-- Link to your custom CA certificate -->
+        <trust-anchors>
+            <!-- Trust your custom CA from the app's resources -->
+            <certificates src="@raw/new_certificate" />
+            <!-- Trust system CAs as well -->
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
