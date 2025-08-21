@@ -11,10 +11,7 @@ const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 
-
-
-
-Future<bool> apiLogin() async {
+Future<dynamic> apiLogin() async {
 
   //login
   final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
@@ -25,15 +22,12 @@ Future<bool> apiLogin() async {
   int statusCode = response.statusCode;
   var jsonDecoding = jsonDecode(response.body);
 
-  if(statusCode != 200) {
-    return false;
+  if(statusCode == 200) {
+    return jsonDecoding;
   }
   else
   {
-    var jsonDecoding = jsonDecode(response.body);
-    prefsGlobal.setString(NUDMantraTempID, jsonDecoding['tmp_id']);
-    // updateCookie(response);
-    return true;
+    return false;
   }
 }
 

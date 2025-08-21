@@ -226,27 +226,37 @@ class _loginPageState extends State<loginPage> {
     apiLogin().then((response)
     {
       serviceCall = false;
-      if (response)
+      if (response.runtimeType==bool)
       {
-
-        Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (
-                  context) => OTPPage()));
-
-        // deskGetEmployeeDetail().then((response)
-        // {
-        //   extraDataGloble.clear();
-        //   prefsGloble.setBool(deskNUDBFFLogin, true);
-        //   Navigator.of(context).pushReplacementNamed('/deskDashboardPage');
-        //   setState(() {});
-        // });
+        showAlert(ApplicationTitle, 'Issue in login');
+        setState(() {});
       }
       else
       {
-        // showAlert(deskApplicationTitle,"Email and password not match");
-        // prefsGloble.setBool(deskNUDBFFLogin, false);
-        // setState(() {});
+        var allKeys = response.keys;
+
+        if(allKeys.contains('tmp_id'))
+        {
+          prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
+          Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (
+                  context) => OTPPage()));
+        }
+        else
+        {
+          String cookie = "";
+          for (var key in response.keys)
+          {
+            if(!['message','full_name','home_page'].contains(key))
+            {
+              if (cookie.isNotEmpty) {
+                cookie += ";";
+              }
+              cookie += "$key=${cookies[key]!}";
+            }
+          }
+        }
       }
     });
   }
