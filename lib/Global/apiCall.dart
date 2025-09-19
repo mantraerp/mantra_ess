@@ -7,67 +7,94 @@ import 'package:mantra_ess/Global/webService.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
+import 'AppWidget.dart';
+
 const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
 
 
-Future<dynamic> apiLogin() async {
 
-  //login
-  final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
-  final String otp = prefsGlobal.getString(NUDMantraPass)!;
+dynamic _handleFailResponse(dynamic response){
 
-  final response = await http.post(Uri.parse("$URLLogin?user=$phoneNumber&pwd=$otp"));
-
-  int statusCode = response.statusCode;
-  var jsonDecoding = jsonDecode(response.body);
-
-  if(statusCode == 200) {
-    return jsonDecoding;
+  try {
+    dynamic jsonParseValue = jsonDecode(response.body);
+    if (jsonParseValue.keys.contains("message")) {
+      if (jsonParseValue["message"].keys.contains("message")) {
+        showAlert(ApplicationTitle, jsonParseValue["message"]["message"]);
+      }
+    }
+    else if (jsonParseValue.keys.contains("exception")) {
+      showAlert(ApplicationTitle, jsonParseValue["exception"]);
+    }
+    else {
+      showAlert(ApplicationTitle, "Issue to operation.");
+    }
+    return false;
   }
-  else
+  catch (val)
   {
+    showAlert(ApplicationTitle,"Error: $val");
     return false;
   }
 }
 
-void updateCookie(http.Response response) {
 
-  String allSetCookie = response.headers['set-cookie']!;
-  var setCookies = allSetCookie.split(',');
-  for (var setCookie in setCookies) {
-    var cookies = setCookie.split(';');
-    for (var cookie in cookies) {
-      setCookieFunction(cookie);
-    }
+Future<dynamic> apiLogin() async {
+
+  final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
+  final String otp = prefsGlobal.getString(NUDMantraPass)!;
+
+  final response = await http.post(Uri.parse("$URLLogin?user=$phoneNumber&pwd=$otp"));
+  int statusCode = response.statusCode;
+
+  if(statusCode == 200) {
+    return jsonDecode(response.body);
   }
-  headers['Cookie'] = generateCookieHeader();
-}
-
-void setCookieFunction(String rawCookie) {
-  if (rawCookie.isNotEmpty) {
-    var keyValue = rawCookie.split('=');
-    if (keyValue.length == 2) {
-      var key = keyValue[0].trim();
-      var value = keyValue[1];
-
-      // ignore keys that aren't cookies
-      if (key == 'path' || key == 'expires') {
-        return;
-      }
-      cookies[key] = value;
-    }
+  else
+  {
+    return _handleFailResponse(response);
   }
 }
 
-String generateCookieHeader() {
-  String cookie = "";
-  for (var key in cookies.keys) {
-    if (cookie.isNotEmpty) {
-      cookie += ";";
-    }
-    cookie += "$key=${cookies[key]!}";
+Future<dynamic> apiOTPVerification(String OTP) async {
+
+  // var data = {
+  //   "user": prefsGlobal.getString(NUDMantraEmail)!,
+  //   "pwd": prefsGlobal.getString(NUDMantraPass)!,
+  //   "otp":OTP,
+  //   "tmp_id":prefsGlobal.getString(NUDMantraTempID)!
+  // };
+  //
+  // final response = await http.post(Uri.parse(URLOTPVerification),body: jsonEncode(data));
+
+
+  final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
+  final String pwd = prefsGlobal.getString(NUDMantraPass)!;
+  final String tmp_id = prefsGlobal.getString(NUDMantraTempID)!;
+
+  // final response = await http.post(Uri.parse("$URLOTPVerification?"),body: jsonEncode(data));
+  final response = await http.post(Uri.parse("$URLOTPVerification?user=$phoneNumber&pwd=$pwd&otp=$OTP&tmp_id=$tmp_id"));
+  int statusCode = response.statusCode;
+
+  if(statusCode == 200) {
+    return jsonDecode(response.body);
   }
-  return cookie;
+  else
+  {
+    return _handleFailResponse(response);
+  }
 }
 
+Future<dynamic> apiGetDashboardMenu() async {
+
+  final response = await http.post(Uri.parse(URLGetMenu),headers:headers);
+  int statusCode = response.statusCode;
+
+  if(statusCode == 200) {
+    return jsonDecode(response.body);
+  }
+  else
+  {
+    return _handleFailResponse(response);
+  }
+}

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/appWidget.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
@@ -16,7 +17,7 @@ class OTPPage extends StatefulWidget {
 class _OTPPageState extends State<OTPPage> {
 
   final TextEditingController _txtCode = TextEditingController();
-  bool loginCall = false;
+  bool serviceCall = false;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _OTPPageState extends State<OTPPage> {
 
   Widget screenDesign(BuildContext context){
 
-    if(loginCall){
+    if(serviceCall){
       return Center(
           child:Image.asset(
             IMGLoader,
@@ -62,13 +63,6 @@ class _OTPPageState extends State<OTPPage> {
                   onPressed: () {
                     _txtCode.clear();
                   }),
-              // labelStyle:GoogleFonts.plusJakartaSans(
-              //     fontWeight: FontWeight.w500,
-              //     textStyle: const TextStyle(
-              //       fontSize: 17,
-              //       color: deskappNavigation,
-              //     )
-              // ),
               labelText: "Varification code",
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -85,13 +79,6 @@ class _OTPPageState extends State<OTPPage> {
               }
             },
             keyboardType: TextInputType.number,
-            // style:GoogleFonts.plusJakartaSans(
-            //     fontWeight: FontWeight.w500,
-            //     textStyle: const TextStyle(
-            //       fontSize: 17,
-            //       color: deskappNavigation,
-            //     )
-            // ),
           ),
           const SizedBox(height: 50.0),
           MaterialButton(
@@ -125,7 +112,7 @@ class _OTPPageState extends State<OTPPage> {
 
   void actResendCode(){
 
-    String otpString = 'OTP will be sent on number ${prefsGlobal.getString(NUDMantraEmail)}.';
+    String otpString = 'OTP will be sent on ${prefsGlobal.getString(NUDMantraEmail)}.';
 
     showDialog(
       context: context,
@@ -140,14 +127,14 @@ class _OTPPageState extends State<OTPPage> {
               onPressed: () {
                 Navigator.of(context).pop();
                 setState(() {
-                  loginCall = true;
+                  serviceCall = true;
                   actSendOTP();
                 });
                 //
               },
             ),
             TextButton(
-              child: mantraLabel('Change number', 12,appGray, TextAlign.center, FontWeight.w500, 1),
+              child: mantraLabel('Change user', 12,appGray, TextAlign.center, FontWeight.w500, 1),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -165,105 +152,66 @@ class _OTPPageState extends State<OTPPage> {
   }
   void actOTPVerification() async {
 
-    if(loginCall){
-      return;
-    }
+    if(serviceCall){return;}
+    setState(() {serviceCall = true;});
 
-    setState(() {
-      loginCall = true;
-    });
-
-    final String tmp_id = prefsGlobal.getString(NUDMantraTempID)!;
-    final String email = prefsGlobal.getString(NUDMantraEmail)!;
-    final String pass = prefsGlobal.getString(NUDMantraPass)!;
-
-
-
-    final response = await http.post(Uri.parse("$URLOTPVerification?user=$email&pwd=$pass&tmp_id=$tmp_id&otp=${_txtCode.text}"));
-    var jsonData = json.decode(response.body);
-    int statusCode = int.parse(jsonData["message"]["status_code"].toString());
-    if(statusCode != 200)
+    apiOTPVerification(_txtCode.text).then((response)
     {
-      setState(() {
-        loginCall = false;
-      });
-      showAlert(ApplicationTitle, jsonData["message"]["message"]);
-    }
-    else
-    {
-      String cookie = "";
-      for (var key in jsonData.keys)
+      serviceCall = false;
+      setState(() {});
+      if (response.runtimeType!=bool)
       {
-        if(!['message','full_name','home_page'].contains(key))
-        {
-          if (cookie.isNotEmpty) {
-            cookie += ";";
+          String cookie = "";
+          for (var key in response.keys)
+          {
+            if(!['message','full_name','home_page'].contains(key))
+            {
+              if (cookie.isNotEmpty) {
+                cookie += ";";
+              }
+              cookie += "$key=${response[key]!}";
+            }
           }
-          cookie += "$key=${cookies[key]!}";
-        }
+          headers['Cookie']=cookie;
       }
-
-      print(cookie);
-
-
-
-
-      loginCall = false;
-      // _saveValues();
-      // Navigator.push(
-      //     context,
-      //     CupertinoPageRoute(builder: (
-      //         context) => NamePage()));
-    }
+    });
   }
-  String generateCookieHeader() {
-    String cookie = "";
-    for (var key in cookies.keys) {
-      if (cookie.isNotEmpty) {
-        cookie += ";";
-      }
-      cookie += "$key=${cookies[key]!}";
-    }
-    return cookie;
-  }
-
   void actSendOTP() async {
 
-    if(loginCall){
+    if(serviceCall){
       return;
     }
+    setState(() {serviceCall = true;});
+    apiLogin().then((response)
+    {
+      serviceCall = false;
+      setState(() {});
+      if (response.runtimeType!=bool)
+      {
+        var allKeys = response.keys;
 
-    setState(() {loginCall = true;});
-
-    // final String phoneNumber = prefsGlobal.getString(NUDBDPhoneNumber)!;
-    // final response = await http.post(Uri.parse("$WSSendOTP?phoneNo=$phoneNumber"));
-    // var jsonData = json.decode(response.body);
-    // setState(() {
-    //   loginCall = false;
-    // });
-    //
-    //
-    // if(jsonData["message"] == "False")
-    // {
-    //   showAlert(ApplicationTitle, "Please enter proper number");
-    // }
-    // else
-    // {
-    //   Fluttertoast.showToast(
-    //       msg: "OTP Sent",
-    //       toastLength: Toast.LENGTH_SHORT,
-    //       gravity: ToastGravity.BOTTOM,
-    //       timeInSecForIosWeb: 1,
-    //       backgroundColor: appGreen,
-    //       textColor: Colors.white,
-    //       fontSize: 16.0
-    //   );
-    // }
-  }
-  _saveValues() async {
-    // prefsGloble.setString(NUDBDOTP, _txtCode.text);
-    // prefsGloble.setBool(NUDBDLogin, true);
-    _txtCode.text = "";
+        if(allKeys.contains('tmp_id'))
+        {
+          prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
+          showAlert(ApplicationTitle, 'Resend OTP.');
+        }
+        else
+        {
+          String cookie = "";
+          for (var key in response.keys)
+          {
+            if(!['message','full_name','home_page'].contains(key))
+            {
+              if (cookie.isNotEmpty) {
+                cookie += ";";
+              }
+              cookie += "$key=${response[key]!}";
+            }
+          }
+          headers['Cookie']=cookie;
+        }
+      }
+    });
   }
 }
 

@@ -24,38 +24,13 @@ class _loginPageState extends State<loginPage> {
     super.initState();
 
     showPassword = true;
-    _fillIDPassword();
+    // _fillIDPassword();
   }
 
   _fillIDPassword() async {
 
-    // var temp = prefsGloble.getString(deskNUDBFFEmail);
-    // if(temp!=null){
-    //   txtEmail.text = prefsGloble.getString(deskNUDBFFEmail)!;
-    //  // txtPassword.text = prefsGloble.getString(deskNUDBFFPassword)!;
-    // }
-
     txtEmail.text="ravi.patel@mantratec.com";
-    txtPassword.text="Mantra1988*";
-
-
-    // String phoneNumber = prefsGloble.getString(NUDBDPhoneNumber)!;
-    // String phoneNumberPrevious = prefsGloble.getString(NUDBDPhoneNumberPrevious)!;
-    // if(phoneNumberPrevious==phoneNumber){
-    //   txtPassword.text = prefsGloble.getString(deskNUDBFFPassword)!;
-    // }
-
-
-    // if(Platform.isAndroid){
-    //   // var temp =(await BatteryInfoPlugin().androidBatteryInfo)?.batteryLevel;
-    //   // batteryPercentage=temp.toString();
-    //   batteryPercentage='0'.toString();
-    // }
-    // if(Platform.isIOS){
-    //   // var temp =(await BatteryInfoPlugin().iosBatteryInfo)?.batteryLevel;
-    //   // batteryPercentage=temp.toString();
-    //   batteryPercentage='0'.toString();
-    // }
+    txtPassword.text="";
   }
 
   @override
@@ -85,13 +60,6 @@ class _loginPageState extends State<loginPage> {
                   onPressed: () {
                     txtEmail.clear();
                   }),
-              // labelStyle:GoogleFonts.plusJakartaSans(
-              //     fontWeight: FontWeight.w500,
-              //     textStyle: const TextStyle(
-              //       fontSize: 17,
-              //       color: deskappNavigation,
-              //     )
-              // ),
               labelText: "Enter your email",
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -108,13 +76,6 @@ class _loginPageState extends State<loginPage> {
               }
             },
             keyboardType: TextInputType.emailAddress,
-            // style:GoogleFonts.plusJakartaSans(
-            //     fontWeight: FontWeight.w500,
-            //     textStyle: const TextStyle(
-            //       fontSize: 17,
-            //       color: deskappNavigation,
-            //     )
-            // ),
           ) ,
           const SizedBox(height: 30.0),
           TextFormField(
@@ -136,13 +97,6 @@ class _loginPageState extends State<loginPage> {
 
                     });
                   }),
-              // labelStyle: GoogleFonts.plusJakartaSans(
-              //     fontWeight: FontWeight.w500,
-              //     textStyle: const TextStyle(
-              //       fontSize: 17,
-              //       color: deskappNavigation,
-              //     )
-              // ),
               labelText: "Enter your password",
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -160,13 +114,6 @@ class _loginPageState extends State<loginPage> {
               }
             },
             keyboardType: TextInputType.text,
-            // style: GoogleFonts.plusJakartaSans(
-            //     fontWeight: FontWeight.w500,
-            //     textStyle: const TextStyle(
-            //       fontSize: 17,
-            //       color: deskappNavigation,
-            //     )
-            // ),
           ),
           const SizedBox(height: 50.0),
           SizedBox(
@@ -207,10 +154,6 @@ class _loginPageState extends State<loginPage> {
             ),
           ),
           const SizedBox(height: 60.0,),
-          // Image.asset(IMGSplash1,height: 100,width: 100,),
-          // const SizedBox(height: 30.0,),
-          // Image.asset(IMGSplash2,height: 150,width: 250,),
-          // const SizedBox(height: 30.0,),
         ],
       ),
     );
@@ -228,7 +171,6 @@ class _loginPageState extends State<loginPage> {
       serviceCall = false;
       if (response.runtimeType==bool)
       {
-        showAlert(ApplicationTitle, 'Issue in login');
         setState(() {});
       }
       else
@@ -253,9 +195,10 @@ class _loginPageState extends State<loginPage> {
               if (cookie.isNotEmpty) {
                 cookie += ";";
               }
-              cookie += "$key=${cookies[key]!}";
+              cookie += "$key=${response[key]!}";
             }
           }
+          headers['Cookie']=cookie;
         }
       }
     });
