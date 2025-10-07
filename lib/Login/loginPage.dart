@@ -4,6 +4,7 @@ import 'package:mantra_ess/Global/AppWidget.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Login/OTPPage.dart';
+import 'package:mantra_ess/dashboard.dart';
 
 
 class loginPage extends StatefulWidget {
@@ -24,13 +25,13 @@ class _loginPageState extends State<loginPage> {
     super.initState();
 
     showPassword = true;
-    // _fillIDPassword();
+    _fillIDPassword();
   }
 
   _fillIDPassword() async {
 
     txtEmail.text="ravi.patel@mantratec.com";
-    txtPassword.text="";
+    txtPassword.text="Mantra@123";
   }
 
   @override
@@ -199,6 +200,11 @@ class _loginPageState extends State<loginPage> {
             }
           }
           headers['Cookie']=cookie;
+
+          Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (
+                  context) => dashboard()));
         }
       }
     });

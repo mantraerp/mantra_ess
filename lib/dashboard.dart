@@ -1,5 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
+
+import 'SalarySlip/salaryslip_list.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -42,6 +45,12 @@ class _dashboardState extends State<dashboard> {
               child: InkWell(
                 onTap: () {
                   //TODO: Open cards
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (
+                          context) => salaryslip_list()));
+
+
                 },
                 borderRadius: BorderRadius.circular(12.0),
                 child: Container(
