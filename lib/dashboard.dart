@@ -4,6 +4,7 @@ import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
+import 'package:mantra_ess/Screens/profile_screen.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -33,75 +34,82 @@ class _dashboardState extends State<dashboard> {
             leading: Container(),
             centerTitle: true,
             actions: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Icon(
-                  Icons.person_outline_rounded,
-                  size: 24,
-                  color: Theme.of(context).primaryColor,
+              GestureDetector(
+                onTap: () => Get.to(ProfileScreen()),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Icon(
+                    Icons.person_outline_rounded,
+                    size: 24,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             ],
           ),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.builder(
-              shrinkWrap: false,
-              physics: const BouncingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 8.0,
-                childAspectRatio: 1,
-              ),
-              itemCount: controller.dashboardCards.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      if (controller.dashboardCards[index] == 'Attendance') {
-                        Get.to(AttendanceScreen());
-                      } else if (controller.dashboardCards[index] ==
-                          'Salary Slip') {
-                        Get.to(salaryslip_list());
-                      }
-                      //TODO: add other screen routes
-                    },
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getIconForIndex(index),
-                            size: 24,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            controller.dashboardCards[index],
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
+          body: controller.dashboardCards.isNotEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: GridView.builder(
+                    shrinkWrap: false,
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0,
+                          childAspectRatio: 1,
+                        ),
+                    itemCount: controller.dashboardCards.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            if (controller.dashboardCards[index] ==
+                                'Attendance') {
+                              Get.to(AttendanceScreen());
+                            } else if (controller.dashboardCards[index] ==
+                                'Salary Slip') {
+                              Get.to(salaryslip_list());
+                            }
+                            //TODO: add other screen routes
+                          },
+                          borderRadius: BorderRadius.circular(12.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  _getIconForIndex(index),
+                                  size: 24,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  controller.dashboardCards[index],
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ),
+                )
+              : Center(child: Text('No data')),
         );
       },
     );
