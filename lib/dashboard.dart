@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
+import 'package:mantra_ess/Screens/attendance_screen.dart';
 
 import 'SalarySlip/salaryslip_list.dart';
 
@@ -13,7 +16,7 @@ class dashboard extends StatefulWidget {
 
 class _dashboardState extends State<dashboard> {
   bool serviceCall = false;
-
+  // final DashboardController dashboardController = Get.lazyPut(()=>DashboardController());
   @override
   void initState() {
     super.initState();
@@ -23,24 +26,35 @@ class _dashboardState extends State<dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          shrinkWrap: false,
-          physics: const BouncingScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8.0,
-            mainAxisSpacing: 8.0,
-            childAspectRatio: 1,
+    return GetBuilder<DashboardController>(
+      init: DashboardController(),
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Dashboard'),
+            leading: Container(),
+            centerTitle: true,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 24,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
           ),
-          itemCount: 18,
-          itemBuilder: (context, index) {
-            return Card(
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.builder(
+              shrinkWrap: false,
+              physics: const BouncingScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 8.0,
+                childAspectRatio: 1,
               ),
               child: InkWell(
                 onTap: () {
@@ -75,14 +89,14 @@ class _dashboardState extends State<dashboard> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+                );
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 

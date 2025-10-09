@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:mantra_ess/AppBindings.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Login/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,34 +10,31 @@ import 'dart:async';
 import 'Global/constant.dart';
 import 'dart:io';
 
-
-
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
 
-
-void main() {
+Future<void> main() async {
   HttpOverrides.global = MyHttpOverrides();
+  await GetStorage.init();
 
-  runApp(MaterialApp (
-    title: "Mantra",
-    home: const LaunchScreen(),
-    navigatorKey: navigatorKey,
-    routes: <String, WidgetBuilder> {
-      '/LoginPage': (BuildContext context) => loginPage(),
-    },
-    debugShowCheckedModeBanner:false,
-    theme: ThemeData(
-      fontFamily: 'Georgia',
-      textTheme: const TextTheme(
-      ),
+  runApp(
+    GetMaterialApp(
+      title: "Mantra",
+      home: const LaunchScreen(),
+      navigatorKey: navigatorKey,
+      routes: <String, WidgetBuilder>{
+        '/LoginPage': (BuildContext context) => loginPage(),
+      },
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Georgia', textTheme: const TextTheme()),
+      initialBinding: AppBindings(),
     ),
-  )
   );
 }
 
@@ -43,21 +43,22 @@ class LaunchScreen extends StatefulWidget {
   @override
   LaunchScreenState createState() => LaunchScreenState();
 }
-class LaunchScreenState extends State<LaunchScreen>
-{
+
+class LaunchScreenState extends State<LaunchScreen> {
   @override
   void initState() {
     super.initState();
     startTimer();
   }
+
   startTimer() async {
     prefsGlobal = await SharedPreferences.getInstance();
 
     var duration = const Duration(seconds: 2);
     return Timer(duration, navigationPage);
   }
-  void navigationPage() async {
 
+  void navigationPage() async {
     // full screen width and height
     deviceWidth = MediaQuery.of(context).size.width;
     deviceHeight = MediaQuery.of(context).size.height;
@@ -90,9 +91,8 @@ class LaunchScreenState extends State<LaunchScreen>
     //   if(isLogin==null){
     //     prefsGloble.setBool(NUDBDLogin, false);
     //   }
-      Navigator.of(context).pushReplacementNamed('/LoginPage');
+    Navigator.of(context).pushReplacementNamed('/LoginPage');
     // }
-
   }
 
   @override
