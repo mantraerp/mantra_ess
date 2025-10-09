@@ -12,6 +12,9 @@ import 'package:mantra_ess/Models/profile_model.dart';
 
 import 'AppWidget.dart';
 
+
+
+
 const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
 final box = GetStorage();
@@ -125,6 +128,26 @@ Future<dynamic> apiGetAttendance(String fromDate, String toDate) async {
     final AttendanceResponse res = attendanceResponseFromJson(response.body);
     return res;
   } else {
+    return _handleFailResponse(response);
+  }
+}
+
+
+Future<dynamic> apiSalarySlipList() async {
+
+  String url = "http://192.168.11.66:8011/api/method/erp_mobile.api.masterdata.get_salary_slips?employee_code=HR-EMP-00002&from_date=01-04-2025&to_date=31-03-2026";
+
+  // final response = await http.post(Uri.parse(url),headers:headers);
+  final response = await http.get(Uri.parse(url));
+
+  int statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['data'];
+  }
+  else
+  {
     return _handleFailResponse(response);
   }
 }

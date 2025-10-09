@@ -24,12 +24,14 @@ class _loginPageState extends State<loginPage> {
     super.initState();
 
     showPassword = true;
-    // _fillIDPassword();
+    _fillIDPassword();
   }
 
   _fillIDPassword() async {
-    txtEmail.text = "ravi.patel@mantratec.com";
-    txtPassword.text = "";
+
+
+    txtEmail.text="ravi.patel@mantratec.com";
+    txtPassword.text="Mantra@123";
   }
 
   @override
@@ -202,11 +204,13 @@ class _loginPageState extends State<loginPage> {
               cookie += "$key=${response[key]!}";
             }
           }
-          headers['Cookie'] = cookie;
+
+          headers['Cookie']=cookie;
+
           Navigator.push(
-            context,
-            CupertinoPageRoute(builder: (context) => dashboard()),
-          );
+              context,
+              CupertinoPageRoute(builder: (
+                  context) => dashboard()));
         }
       }
     });

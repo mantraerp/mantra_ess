@@ -1,8 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
+
+import 'SalarySlip/salaryslip_list.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -53,43 +56,38 @@ class _dashboardState extends State<dashboard> {
                 mainAxisSpacing: 8.0,
                 childAspectRatio: 1,
               ),
-              itemCount: controller.dashboardCards.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      if (controller.dashboardCards[index] == 'Attendance') {
-                        Get.to(AttendanceScreen());
-                      }
-                    },
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getIconForIndex(index),
-                            size: 24,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            controller.dashboardCards[index],
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w300,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+              child: InkWell(
+                onTap: () {
+                  //TODO: Open cards
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(builder: (
+                          context) => salaryslip_list()));
+
+
+                },
+                borderRadius: BorderRadius.circular(12.0),
+                child: Container(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _getIconForIndex(index),
+                        size: 24,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _getTitleForIndex(index),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
