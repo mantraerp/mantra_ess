@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
+import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
 
 class dashboard extends StatefulWidget {
@@ -64,6 +65,9 @@ class _dashboardState extends State<dashboard> {
                     onTap: () {
                       if (controller.dashboardCards[index] == 'Attendance') {
                         Get.to(AttendanceScreen());
+                      } else if (controller.dashboardCards[index] ==
+                          'Salary Slip') {
+                        Get.to(salaryslip_list());
                       }
                       //TODO: add other screen routes
                     },
