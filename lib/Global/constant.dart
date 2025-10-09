@@ -45,3 +45,5 @@ const String Msg_Res_Issue_In_Signup = 'There is some issue please try again.';
 
 /* Global Variable */
 late final SharedPreferences prefsGlobal;
+
+final String ALLOWED_SCREEN = 'allowed_screens';

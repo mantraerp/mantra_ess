@@ -12,9 +12,6 @@ import 'package:mantra_ess/Models/profile_model.dart';
 
 import 'AppWidget.dart';
 
-
-
-
 const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
 final box = GetStorage();
@@ -50,7 +47,7 @@ Future<dynamic> apiLogin() async {
   if (statusCode == 200) {
     final res = jsonDecode(response.body);
     if (res.keys.contains('allowed_screens')) {
-      box.write('allowed_screens', res['allowed_screens']);
+      box.write(ALLOWED_SCREEN, res['allowed_screens']);
     }
     return res;
   } else {
@@ -132,10 +129,9 @@ Future<dynamic> apiGetAttendance(String fromDate, String toDate) async {
   }
 }
 
-
 Future<dynamic> apiSalarySlipList() async {
-
-  String url = "http://192.168.11.66:8011/api/method/erp_mobile.api.masterdata.get_salary_slips?employee_code=HR-EMP-00002&from_date=01-04-2025&to_date=31-03-2026";
+  String url =
+      "http://192.168.11.66:8011/api/method/erp_mobile.api.masterdata.get_salary_slips?employee_code=HR-EMP-00002&from_date=01-04-2025&to_date=31-03-2026";
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final response = await http.get(Uri.parse(url));
@@ -145,9 +141,7 @@ Future<dynamic> apiSalarySlipList() async {
   if (statusCode == 200) {
     final data = json.decode(response.body);
     return data['data'];
-  }
-  else
-  {
+  } else {
     return _handleFailResponse(response);
   }
 }
