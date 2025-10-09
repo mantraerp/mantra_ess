@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-double  deviceWidth = 0.0;
-double  deviceHeight = 0.0;
-double  deviceHeightWithoutSafeArea = 0.0;
+double deviceWidth = 0.0;
+double deviceHeight = 0.0;
+double deviceHeightWithoutSafeArea = 0.0;
 
 double topSpaceFromNavigationbar = 50;
-
 
 //Cookies
 Map<String, String> cookies = {};
 Map<String, String> headers = {
-    "content-type": "application/x-www-form-urlencoded"
+  "content-type": "application/x-www-form-urlencoded",
 };
 
 const String ApplicationTitle = 'Mantra Ess';
@@ -26,13 +24,17 @@ const String NUDMantraPass = "nudMantraPass";
 
 const String NUDMantraTempID = "nudMantraTempID";
 
-
 /* Colour */
 const Color appWhite = Colors.white;
 const Color appGray = Color.fromARGB(255, 76, 92, 101);
 const Color appBlack = Colors.black;
-const Color appGrayDark = Color.fromARGB(255, 110, 110, 109);//Text Colour
+const Color appGrayDark = Color.fromARGB(255, 110, 110, 109); //Text Colour
 const Color appMantraBlue = Colors.black;
+const Color appBlue100 = Color(0xffcddaff);
+const Color appRed = Color(0xffEF4D56);
+const Color appGreen = Color(0xff22B783);
+const Color appBlue = Color(0xff5D87FF);
+const Color appGrey800 = Color(0xff919191);
 
 /* Image */
 const String IMGLoader = "assets/MantraLogo.png";
