@@ -1,8 +1,6 @@
-
 // const String BASE_URL= "https://smartfzco.milaap.ai";
 // const String BASE_URL= "https://mantratec.milaap.ai";
 const String BASE_URL = "http://192.168.11.66:8011";
-
 
 const String SUB_BASE_URL = BASE_URL + "/api/method/";
 const String SUB_RESOURCE_URL = BASE_URL + "/resource/";
@@ -19,3 +17,5 @@ const String URLGetProfile =
 
 const String URLGetAttendance =
     SUB_BASE_URL + "erp_mobile.api.masterdata.get_attendance";
+
+const String URLLogout = SUB_BASE_URL + "logout";

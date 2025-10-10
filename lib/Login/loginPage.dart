@@ -28,10 +28,8 @@ class _loginPageState extends State<loginPage> {
   }
 
   _fillIDPassword() async {
-
-
-    txtEmail.text="ravi.patel@mantratec.com";
-    txtPassword.text="Mantra@123";
+    txtEmail.text = "ravi.patel@mantratec.com";
+    txtPassword.text = "Mantra@123";
   }
 
   @override
@@ -205,12 +203,12 @@ class _loginPageState extends State<loginPage> {
             }
           }
 
-          headers['Cookie']=cookie;
+          headers['Cookie'] = cookie;
 
           Navigator.push(
-              context,
-              CupertinoPageRoute(builder: (
-                  context) => dashboard()));
+            context,
+            CupertinoPageRoute(builder: (context) => dashboard()),
+          );
         }
       }
     });

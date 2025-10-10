@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:mantra_ess/Login/LoginPage.dart';
 import 'package:mantra_ess/Models/attendance_model.dart';
 import 'package:mantra_ess/Models/profile_model.dart';
 
@@ -48,8 +50,24 @@ Future<dynamic> apiLogin() async {
     final res = jsonDecode(response.body);
     if (res.keys.contains('allowed_screens')) {
       box.write(ALLOWED_SCREEN, res['allowed_screens']);
+      box.write(SID, res['sid']);
     }
     return res;
+  } else {
+    return _handleFailResponse(response);
+  }
+}
+
+Future<dynamic> apiLogout() async {
+  final sid = box.read(SID);
+  final response = await http.post(
+    Uri.parse(URLLogout),
+    headers: {'Cookie': 'sid=$sid'},
+  );
+  int statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    Get.offAll(loginPage());
   } else {
     return _handleFailResponse(response);
   }

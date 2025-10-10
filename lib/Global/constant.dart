@@ -32,9 +32,11 @@ const Color appGrayDark = Color.fromARGB(255, 110, 110, 109); //Text Colour
 const Color appMantraBlue = Colors.black;
 const Color appBlue100 = Color(0xffcddaff);
 const Color appRed = Color(0xffEF4D56);
-const Color appGreen = Color(0xff22B783);
-const Color appBlue = Color(0xff5D87FF);
+const Color appGreen = Color.fromARGB(255, 202, 248, 232);
+const Color appBlue = Color.fromARGB(255, 176, 193, 241);
 const Color appGrey800 = Color(0xff919191);
+const Color appText = Color(0xff25272C);
+const Color appYellow = Color(0xffFFCE6E);
 
 /* Image */
 const String IMGLoader = "assets/MantraLogo.png";
@@ -47,3 +49,4 @@ const String Msg_Res_Issue_In_Signup = 'There is some issue please try again.';
 late final SharedPreferences prefsGlobal;
 
 final String ALLOWED_SCREEN = 'allowed_screens';
+final String SID = 'sid';
