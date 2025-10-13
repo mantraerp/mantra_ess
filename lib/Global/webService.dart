@@ -18,4 +18,7 @@ const String URLGetProfile =
 const String URLGetAttendance =
     SUB_BASE_URL + "erp_mobile.api.masterdata.get_attendance";
 
+const String URLGetExpenses =
+    SUB_BASE_URL + "erp_mobile.api.masterdata.get_expences";
+
 const String URLLogout = SUB_BASE_URL + "logout";

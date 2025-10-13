@@ -4,6 +4,7 @@ import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
+import 'package:mantra_ess/Screens/expense_screen.dart';
 import 'package:mantra_ess/Screens/profile_screen.dart';
 
 class dashboard extends StatefulWidget {
@@ -75,6 +76,9 @@ class _dashboardState extends State<dashboard> {
                             } else if (controller.dashboardCards[index] ==
                                 'Salary Slip') {
                               Get.to(salaryslip_list());
+                            } else if (controller.dashboardCards[index] ==
+                                'Expense Claim') {
+                              Get.to(ExpenseScreen());
                             }
                             //TODO: add other screen routes
                           },
@@ -137,30 +141,6 @@ class _dashboardState extends State<dashboard> {
       Icons.info,
     ];
     return icons[index % icons.length];
-  }
-
-  String _getTitleForIndex(int index) {
-    final titles = [
-      'Attendance Register',
-      'Leave Application',
-      'Expenses List',
-      'Visit Salon',
-      'Salon List',
-      'KYC Create',
-      'Technical Activity',
-      'Sample Requisition',
-      'Travel & Beat Plan',
-      'Travel Plan Approve',
-      'Create Order',
-      'Cumulative Offer',
-      'Distributor List',
-      'Sales Order List',
-      'Return Create',
-      'RSM Order List',
-      'Employee Information',
-      'Visit EBO',
-    ];
-    return titles[index % titles.length];
   }
 
   _getDashboradMenuOption() async {

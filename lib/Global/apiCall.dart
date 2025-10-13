@@ -7,9 +7,9 @@ import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:mantra_ess/Login/LoginPage.dart';
 import 'package:mantra_ess/Models/attendance_model.dart';
+import 'package:mantra_ess/Models/expense_model.dart';
 import 'package:mantra_ess/Models/profile_model.dart';
 
 import 'AppWidget.dart';
@@ -141,6 +141,24 @@ Future<dynamic> apiGetAttendance(String fromDate, String toDate) async {
 
   if (statusCode == 200) {
     final AttendanceResponse res = attendanceResponseFromJson(response.body);
+    return res;
+  } else {
+    return _handleFailResponse(response);
+  }
+}
+
+Future<dynamic> apiGetExpenses(String fromDate, String toDate) async {
+  final String employeeCode = box.read('employee_code');
+  final response = await http.get(
+    Uri.parse(
+      '$URLGetExpenses?employee_code=$employeeCode&from_date=$fromDate&to_date=$toDate',
+    ),
+    headers: headers,
+  );
+  int statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    final ExpenseResponse res = expenseResponseFromJson(response.body);
     return res;
   } else {
     return _handleFailResponse(response);
