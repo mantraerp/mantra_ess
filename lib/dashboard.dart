@@ -6,7 +6,6 @@ import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
 import 'package:mantra_ess/Screens/profile_screen.dart';
 import 'package:mantra_ess/SerialNumberDetails/SerialNumberDetails.dart';
-import 'package:mantra_ess/BatchTracking/BatchNumberDetails.dart';
 import 'package:mantra_ess/Policy/PolicyList.dart';
 // import 'package:mantra_ess/Holiday/HolidayList.dart';
 import 'package:mantra_ess/Holiday/HolidayList.dart';
