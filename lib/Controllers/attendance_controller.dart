@@ -2,7 +2,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Models/attendance_model.dart';
-import 'package:mantra_ess/Utils.dart';
+import 'package:mantra_ess/utils.dart';
+import '../utils.dart';
 
 class AttendanceController extends GetxController {
   RxList<AttendanceRecord> attendanceList = RxList.empty();
