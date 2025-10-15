@@ -5,14 +5,16 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
-
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:mantra_ess/Login/LoginPage.dart';
+import 'package:mantra_ess/Login/loginPage.dart';
 import 'package:mantra_ess/Models/attendance_model.dart';
 import 'package:mantra_ess/Models/profile_model.dart';
+import 'package:mantra_ess/SerialNumberDetails/ShowSerialNumberDetails.dart';
 
-import 'AppWidget.dart';
+import '../Login/loginPage.dart';
+import '../SerialNumberDetails/ErrorMessage.dart';
+import 'appWidget.dart';
 
 const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -163,3 +165,136 @@ Future<dynamic> apiSalarySlipList() async {
     return _handleFailResponse(response);
   }
 }
+
+//Get SerialNumber Api
+Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
+  String url =
+      "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.track_serial_number?serial_no=$serialNumber";
+
+  // final response = await http.post(Uri.parse(url),headers:headers);
+  final sid = box.read(SID);
+  final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+  int statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['message'];
+  } else {
+    return _handleFailResponse(response);
+  }
+}
+
+//Get Batch Number
+Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
+  String url =
+      "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.track_batch_details?batch_no=$batchNumber";
+
+  // final response = await http.post(Uri.parse(url),headers:headers);
+  final sid = box.read(SID);
+  final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+  int statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['message'];
+  } else {
+    return _handleFailResponse(response);
+  }
+}
+
+//Check The Serial Or Batch
+Future<String?> apiCheckSerialOrBatchType(String number) async {
+  try {
+    String url =
+        "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.check_serial_or_batch?number=$number";
+
+    final sid = box.read(SID);
+    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data["message"] != null &&
+          data["message"]["type"] != null &&
+          (data["message"]["type"] == "serial" || data["message"]["type"] == "batch")) {
+        return data["message"]["type"];
+      } else {
+        // Navigate to ErrorPage
+        return "Serial Or Batch Number is not found";
+      }
+    } else {
+      // Server error → ErrorPage
+      return "Serial and Batch Number is not found";
+    }
+  } catch (e) {
+    // Exception → ErrorPage
+    return "Serial and Batch number is not found";
+  }
+}
+
+
+//Policy List API
+Future<Map<String, dynamic>?> apiPolicyList() async {
+  try {
+    String url = "http://192.168.11.66:8017/api/method/erp_mobile.api.policy.get_policies";
+
+    final sid = box.read(SID);
+    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data;
+    } else {
+      return {"error": "Failed with status ${response.statusCode}"};
+    }
+  } catch (e) {
+    return {"error": "No Data found for this API: $e"};
+  }
+}
+
+//Policy Details Open Api
+Future<Map<String, dynamic>> apifetchPolicyDetails(String policyName) async {
+  try{
+    String url =
+        "http://192.168.11.66:8017/api/method/erp_mobile.api.policy.get_policy_details?policy=$policyName";
+
+    // final response = await http.post(Uri.parse(url),headers:headers);
+    final sid = box.read(SID);
+    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+    int statusCode = response.statusCode;
+
+    if (statusCode == 200) {
+      final Map<String, dynamic> data = json.decode(response.body);
+      return data;
+    } else {
+      return _handleFailResponse(response);
+    }
+  } catch (e) {
+    throw Exception("Error fetching data: $e");
+  }
+}
+
+//Get Holiday Lists
+Future<Map<String, dynamic>?> apiHolidayList() async {
+  final String EmployeeCode = box.read('employee_code');
+  try {
+    String url = "http://192.168.11.66:8017/api/method/erp_mobile.api.holiday.get_holidays?employee_code=$EmployeeCode";
+
+    final sid = box.read(SID);
+    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data;
+    } else {
+      return {"error": "Failed with status ${response.statusCode}"};
+    }
+  } catch (e) {
+    return {"error": "No Data found for this API: $e"};
+  }
+}
+
+
