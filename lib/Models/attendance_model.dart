@@ -39,12 +39,12 @@ class AttendanceResponse {
 
 class AttendanceRecord {
   String name;
-  String employeeName;
+  String? employeeName;
   String attendanceDate;
-  String employeeCode;
+  String? employeeCode;
   String status;
   String? leaveType;
-  String minopStatus;
+  String? minopStatus;
 
   AttendanceRecord({
     required this.name,

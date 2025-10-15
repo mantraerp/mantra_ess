@@ -7,7 +7,7 @@ import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/appWidget.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
-import 'LoginPage.dart';
+import 'loginPage.dart';
 
 class OTPPage extends StatefulWidget {
 

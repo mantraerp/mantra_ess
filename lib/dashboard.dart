@@ -5,6 +5,14 @@ import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
 import 'package:mantra_ess/Screens/profile_screen.dart';
+import 'package:mantra_ess/Screens/scanner_screen.dart';
+import 'package:mantra_ess/Screens/purchase_order_screen.dart';
+import 'package:mantra_ess/Screens/sales_order_screen.dart';
+import 'package:mantra_ess/Screens/sales_invoice_screen.dart';
+import 'package:mantra_ess/Screens/purchase_receipt_screen.dart';
+import 'package:mantra_ess/Screens/purchase_invoice_screen.dart';
+import 'package:mantra_ess/Screens/delivery_note_screen.dart';
+import 'package:mantra_ess/Screens/payment_page.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -76,6 +84,38 @@ class _dashboardState extends State<dashboard> {
                                 'Salary Slip') {
                               Get.to(salaryslip_list());
                             }
+                            else if (controller.dashboardCards[index] ==
+                                'Scan QRCode') {
+                              Get.to(ScannerScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Purchase Order') {
+                              Get.to(PurchaseOrderListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Sales Order') {
+                              Get.to(SalesOrderListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Purchase Receipt') {
+                              Get.to(PurchaseReceiptListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Purchase Invoice') {
+                              Get.to(PurchaseInvoiceListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Sales Invoice') {
+                              Get.to(SalesInvoiceListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Delivery Note') {
+                              Get.to(DeliveryNoteListScreen());
+                            }
+                            else if (controller.dashboardCards[index] ==
+                                'Payment Page') {
+                              Get.to(PaymentPage());
+                            }
                             //TODO: add other screen routes
                           },
                           borderRadius: BorderRadius.circular(12.0),
@@ -144,21 +184,15 @@ class _dashboardState extends State<dashboard> {
       'Attendance Register',
       'Leave Application',
       'Expenses List',
-      'Visit Salon',
-      'Salon List',
-      'KYC Create',
-      'Technical Activity',
-      'Sample Requisition',
-      'Travel & Beat Plan',
-      'Travel Plan Approve',
+      'Payment Page',
       'Create Order',
-      'Cumulative Offer',
-      'Distributor List',
-      'Sales Order List',
-      'Return Create',
-      'RSM Order List',
-      'Employee Information',
-      'Visit EBO',
+      'Sales Invoice',
+      'Delivery Note',
+      'Sales Order',
+      'Scan QRCode',
+      'Purchase Order',
+      'Purchase Receipt',
+      'Purchase Invoice',
     ];
     return titles[index % titles.length];
   }

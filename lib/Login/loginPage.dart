@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mantra_ess/Global/AppWidget.dart';
+import 'package:mantra_ess/Global/appWidget.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Login/OTPPage.dart';
