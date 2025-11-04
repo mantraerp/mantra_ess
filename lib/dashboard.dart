@@ -13,10 +13,13 @@ import 'package:mantra_ess/Screens/purchase_receipt_screen.dart';
 import 'package:mantra_ess/Screens/purchase_invoice_screen.dart';
 import 'package:mantra_ess/Screens/delivery_note_screen.dart';
 import 'package:mantra_ess/Screens/payment_page.dart';
+import 'package:mantra_ess/Screens/payment_page_approve.dart';
 import 'package:mantra_ess/SerialNumberDetails/SerialNumberDetails.dart';
 import 'package:mantra_ess/Policy/PolicyList.dart';
 // import 'package:mantra_ess/Holiday/HolidayList.dart';
 import 'package:mantra_ess/Holiday/HolidayList.dart';
+import 'package:mantra_ess/Screens/expense_claim_list.dart';
+import 'package:mantra_ess/Screens/material_request_screen.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -129,6 +132,18 @@ class _dashboardState extends State<dashboard> {
                       }else if (controller.dashboardCards[index] ==
                           'Holiday') {
                         Get.to(HolidayList());
+                      }
+                      else if (controller.dashboardCards[index] ==
+                          'Expense Claim') {
+                        Get.to(ExpenseClaimScreen());
+                      }
+                      else if (controller.dashboardCards[index] ==
+                          'Material Request') {
+                        Get.to(MaterialRequestScreenListScreen());
+                      }
+                      else if (controller.dashboardCards[index] ==
+                          'Payment Page Approve') {
+                        Get.to(PaymentApprovePage());
                       }
                       //TODO: add other screen routes
                     },

@@ -3,22 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import '../Models/sales_order_model.dart';
+import '../Models/material_request_model.dart';
 import '../Global/constant.dart';
 import '../Global/webService.dart';
-import 'sales_order_detail_screen.dart';
+import 'material_request_detail_screen.dart';
 import 'filter_screen.dart';
 
-class SalesOrderListScreen extends StatefulWidget {
-  const SalesOrderListScreen({Key? key}) : super(key: key);
+class MaterialRequestScreenListScreen extends StatefulWidget {
+  const MaterialRequestScreenListScreen({Key? key}) : super(key: key);
 
   @override
-  State<SalesOrderListScreen> createState() => _SalesOrderListScreenState();
+  State<MaterialRequestScreenListScreen> createState() => _MaterialRequestListScreenState();
 }
 
-class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
+class _MaterialRequestListScreenState extends State<MaterialRequestScreenListScreen> {
   final box = GetStorage();
-  List<SalesOrderRecord> _salesOrders = [];
+  List<MaterialRequestRecord> _materialRequests = [];
   List<String> _statusOptions = [];
   bool _isLoading = true;
   bool _hasError = false;
@@ -46,7 +46,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
     toDate = DateFormat('yyyy-MM-dd').format(now);
 
     _fetchStatusOptions();
-    _fetchSalesOrders(isRefresh: true);
+    _fetchMaterialRequests(isRefresh: true);
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -61,14 +61,14 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
     try {
       final sid = box.read(SID);
       final response = await http.get(
-        Uri.parse(GetSalesOrderStatus),
+        Uri.parse(GetMateriaRequestStatus),
         headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
           _statusOptions = ["All"];
-          _statusOptions.addAll(List<String>.from(data["data"] ?? []));
+          _statusOptions.addAll(List<String>.from(data["data"]["status"] ?? []));
         });
       }
     } catch (e) {
@@ -76,7 +76,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
     }
   }
 
-  Future<void> _fetchSalesOrders({bool isRefresh = false}) async {
+  Future<void> _fetchMaterialRequests({bool isRefresh = false}) async {
     // Validation: From Date cannot be after To Date
     if (DateTime.parse(fromDate).isAfter(DateTime.parse(toDate))) {
       showDialog(
@@ -96,7 +96,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
     }
 
     if (isRefresh) {
-      _salesOrders.clear();
+      _materialRequests.clear();
       _hasMore = true;
     }
     if (!_hasMore && !isRefresh) return;
@@ -112,7 +112,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
       String fromStr = DateFormat('dd-MM-yyyy').format(DateTime.parse(fromDate));
       String toStr = DateFormat('dd-MM-yyyy').format(DateTime.parse(toDate));
 
-      String url = "$GetSalesOrders?from_date=$fromStr&to_date=$toStr";
+      String url = "$GetMaterialRequest?from_date=$fromStr&to_date=$toStr";
       if (selectedStatus != null && selectedStatus != "All") {
         url += "&status=${Uri.encodeComponent(selectedStatus!)}";
       }
@@ -127,23 +127,21 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final poData = data["data"]?["sales_orders"] ?? [];
-        final poResponse = SalesOrderResponse.fromJson({
+        final poData = data["data"]?["material_requests"] ?? [];
+        final poResponse = MaterialRequestResponse.fromJson({
           "message": data["message"],
           "data": poData,
           "status_code": data["status_code"]
         });
-
-
         setState(() {
-          final existingNames = _salesOrders.map((e) => e.name).toSet();
+          final existingNames = _materialRequests.map((e) => e.name).toSet();
           final newItems =
           poResponse.data.where((e) => !existingNames.contains(e.name)).toList();
 
           if (isRefresh) {
-            _salesOrders = poResponse.data;
+            _materialRequests = poResponse.data;
           } else {
-            _salesOrders.addAll(newItems);
+            _materialRequests.addAll(newItems);
           }
 
           if (poResponse.data.isEmpty || newItems.isEmpty) _hasMore = false;
@@ -167,14 +165,14 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
   }
 
   void _loadMore() {
-    if (!_isPaginating && _hasMore && !_isLoading) _fetchSalesOrders();
+    if (!_isPaginating && _hasMore && !_isLoading) _fetchMaterialRequests();
   }
 
   Future<void> _showFilterDialog() async {
     await showDialog(
       context: context,
       builder: (context) => FilterDialogBase(
-        title: "Filter Sales Orders",
+        title: "Filter Material Requests",
         fromDate: fromDate,
         toDate: toDate,
         statusOptions: _statusOptions,
@@ -185,7 +183,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
             toDate = t;
             selectedStatus = s;
           });
-          _fetchSalesOrders(isRefresh: true);
+          _fetchMaterialRequests(isRefresh: true);
         },
       ),
     );
@@ -204,31 +202,43 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
     switch (status?.toLowerCase()) {
       case "draft":
         return const Color(0xFFE2E8F0);
-      case "on hold":
+      case "pending":
         return const Color(0xFFFAEDB9);
-      case "to deliver and bill":
+      case "to receive and bill":
         return const Color(0xFFD4F3FA);
-      case "to bill":
+      case "submitted":
         return const Color(0xFFBCD5F7);
-      case "to deliver":
+      case "to receive":
         return const Color(0xFFA6F7E3);
       case "completed":
+        return const Color(0xFFA3F7B8);
+      case "ordered":
         return const Color(0xFFA3F7B8);
       case "cancelled":
         return const Color(0xFFFECACA);
       case "closed":
         return const Color(0xFFFAD8B1);
-
+      case "issued":
+        return const Color(0xFFFAD8B1);
+      case "partially ordered":
+        return const Color(0xFFFAD8B1);
+      case "delivered":
+        return const Color(0xFFCBD5E1);
+      case "partially received":
+        return const Color(0xFFCBD5E1);
+      case "stopped":
+        return const Color(0xFFCBD5E1);
       default:
         return const Color(0xFFD3D3D3);
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Sales Orders"),
+        title: const Text("Material Requests"),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -244,10 +254,10 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
               controller: _searchController,
               onChanged: (v) {
                 _searchText = v.trim();
-                _fetchSalesOrders(isRefresh: true);
+                _fetchMaterialRequests(isRefresh: true);
               },
               decoration: InputDecoration(
-                hintText: "Search sales orders...",
+                hintText: "Search material requests...",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -265,23 +275,23 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _hasError
           ? Center(child: Text(_errorMessage))
-          : _salesOrders.isEmpty
+          : _materialRequests.isEmpty
           ? const Center(
-          child: Text("No Sales Invoices Found",
+          child: Text("No Material Requests Found",
               style: TextStyle(color: Colors.grey)))
           : RefreshIndicator(
-        onRefresh: () => _fetchSalesOrders(isRefresh: true),
+        onRefresh: () => _fetchMaterialRequests(isRefresh: true),
         child: ListView.builder(
           controller: _scrollController,
-          itemCount: _salesOrders.length + (_isPaginating ? 1 : 0),
+          itemCount: _materialRequests.length + (_isPaginating ? 1 : 0),
           itemBuilder: (context, i) {
-            if (i == _salesOrders.length) {
+            if (i == _materialRequests.length) {
               return const Padding(
                 padding: EdgeInsets.all(16),
                 child: Center(child: CircularProgressIndicator()),
               );
             }
-            final dn = _salesOrders[i];
+            final dn = _materialRequests[i];
             return Card(
               elevation: 4,
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -293,7 +303,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        SalesOrderDetailScreen(salesOrderName: dn.name),
+                        MaterialRequestDetailScreen(materialRequestName: dn.name),
                   ),
                 ),
                 child: Padding(
@@ -332,10 +342,10 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text("Customer:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                          Text("Title:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(
                             child: Text(
-                              dn.customer_name ?? "-",
+                              dn.title ?? "-",
                               textAlign: TextAlign.end,
                               style: const TextStyle(
                                   fontWeight: FontWeight.w500,
@@ -349,7 +359,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text("Date:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
-                          Text(formatDate(dn.transactionDate),
+                          Text(formatDate(dn.transcationDate),
                               style: const TextStyle(fontWeight: FontWeight.w500)),
                         ],
                       ),
@@ -357,12 +367,12 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Grand Total",
+                          const Text("Material Request Type",
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black54)),
                           Text(
-                            "${dn.currency ?? ''} ${dn.grandTotal?.toStringAsFixed(2) ?? '0.00'}",
+                            "${dn.materialRequestType ?? ''}",
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,

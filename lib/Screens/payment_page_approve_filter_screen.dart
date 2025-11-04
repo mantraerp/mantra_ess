@@ -3,17 +3,12 @@ import 'payment_api.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class PaymentFilterScreen extends StatefulWidget {
-  final bool usePayroll;
-  final String? selectedMonth;
-  final String? selectedPayrollEntry;
   final Map<String, dynamic>? selectedBank;
   final Map<String, dynamic>? selectedBankAccount;
 
   const PaymentFilterScreen({
     super.key,
-    required this.usePayroll,
-    this.selectedMonth,
-    this.selectedPayrollEntry,
+
     this.selectedBank,
     this.selectedBankAccount,
   });
@@ -23,34 +18,27 @@ class PaymentFilterScreen extends StatefulWidget {
 }
 
 class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
-  bool usePayroll = false;
-  String? month;
-  String? payrollEntry;
+
   Map<String, dynamic>? bank;
   Map<String, dynamic>? bankAccount;
 
-  List<String> months = [];
-  List<String> payrollEntries = [];
+
   List<Map<String, dynamic>> banks = [];
   List<Map<String, dynamic>> bankAccounts = [];
 
-  bool loadingMonths = false;
-  bool loadingPayrollEntries = false;
+
   bool loadingBanks = false;
   bool loadingBankAccounts = false;
 
   // Search Controllers
-  final TextEditingController monthSearchController = TextEditingController();
-  final TextEditingController payrollSearchController = TextEditingController();
+
   final TextEditingController bankSearchController = TextEditingController();
   final TextEditingController bankAccountSearchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    usePayroll = widget.usePayroll;
-    month = widget.selectedMonth;
-    payrollEntry = widget.selectedPayrollEntry;
+
     bank = widget.selectedBank;
     bankAccount = widget.selectedBankAccount;
 
@@ -58,37 +46,15 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
   }
 
   Future<void> fetchInitialData() async {
-    if (usePayroll) {
-      await getMonths();
-      if (month != null) await getPayrollEntries(month!);
-    } else {
+
       await getBanks();
       if (bank != null) await getBankAccounts(bank!['bank_name']);
-    }
+
   }
 
-  Future<void> getMonths() async {
-    setState(() => loadingMonths = true);
-    try {
-      final result = await PaymentAPI.getMonths();
-      months = result.map((m) => m.toString()).toList();
-    } catch (e) {
-      debugPrint("Error fetching months: $e");
-    }
-    setState(() => loadingMonths = false);
-  }
 
-  Future<void> getPayrollEntries(String selectedMonth) async {
-    setState(() => loadingPayrollEntries = true);
-    try {
-      final result = await PaymentAPI.getPayrollEntries(selectedMonth);
-      payrollEntries =
-      result.isNotEmpty ? result.map((e) => e['name'].toString()).toList() : [];
-    } catch (e) {
-      debugPrint("Error fetching payroll entries: $e");
-    }
-    setState(() => loadingPayrollEntries = false);
-  }
+
+
 
   Future<void> getBanks() async {
     setState(() => loadingBanks = true);
@@ -193,67 +159,14 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
                       const SizedBox(height: 16),
 
                       // Payroll / Bank Switch
-                      SwitchListTile(
-                        activeColor: Colors.blueAccent,
-                        title: const Text("Use Payroll Entry"),
-                        value: usePayroll,
-                        onChanged: (v) {
-                          setState(() {
-                            usePayroll = v;
-                            month = null;
-                            payrollEntry = null;
-                            bank = null;
-                            bankAccount = null;
-                            months.clear();
-                            payrollEntries.clear();
-                            banks.clear();
-                            bankAccounts.clear();
-                            fetchInitialData();
-                          });
-                        },
-                      ),
+
                       const SizedBox(height: 8),
 
                       // Payroll Dropdowns
-                      if (usePayroll) ...[
-                        loadingMonths
-                            ? const Center(child: CircularProgressIndicator())
-                            : _buildDropdown(
-                            "Month", month, months, (v) async {
-                          if (v != null) {
-                            setState(() {
-                              month = v;
-                              payrollEntry = null;
-                              payrollEntries.clear();
-                            });
-                            await getPayrollEntries(v);
-                          }
-                        }, monthSearchController),
-                        const SizedBox(height: 10),
-                        if (month != null)
-                          loadingPayrollEntries
-                              ? const Center(child: CircularProgressIndicator())
-                              : payrollEntries.isEmpty
-                              ? const Text(
-                            "No Payroll Entries Found",
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold),
-                          )
-                              : _buildDropdown(
-                              "Payroll Entry",
-                              payrollEntry,
-                              payrollEntries,
-                                  (v) {
-                                setState(() {
-                                  payrollEntry = v;
-                                });
-                              },
-                              payrollSearchController),
-                      ],
+
 
                       // Bank Dropdowns
-                      if (!usePayroll) ...[
+                    ...[
                         loadingBanks
                             ? const Center(child: CircularProgressIndicator())
                             : _buildDropdownMap(
@@ -308,20 +221,7 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            if (usePayroll) {
-                              if (month == null) {
-                                await _showCenteredMessage(
-                                  "Please select a month before applying filters.",
-                                );
-                                return;
-                              }
-                              if (payrollEntry == null || payrollEntry!.isEmpty) {
-                                await _showCenteredMessage(
-                                  "Please select a Payroll Entry before applying filters.",
-                                );
-                                return;
-                              }
-                            } else {
+
                               if (bank == null) {
                                 await _showCenteredMessage(
                                   "Please select a Bank before applying filters.",
@@ -334,12 +234,10 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
                                 );
                                 return;
                               }
-                            }
+
 
                             Navigator.pop(context, {
-                              'usePayroll': usePayroll,
-                              'month': month,
-                              'payrollEntry': payrollEntry,
+
                               'bank': bank,
                               'bankAccount': bankAccount,
                             });

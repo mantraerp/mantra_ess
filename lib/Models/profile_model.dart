@@ -60,16 +60,17 @@ class UserProfileData {
 
   factory UserProfileData.fromJson(Map<String, dynamic> json) =>
       UserProfileData(
-        fullName: json["full_name"],
-        email: json["email"],
-        employeeCode: json["employee_code"],
-        designation: json["designation"],
-        gender: json["gender"],
-        phone: json["phone"],
-        mobileNo: json["mobile_no"],
-        image: json["image"],
-        birthDate: json["birth_date"],
+        fullName: json["full_name"] ?? '',
+        email: json["email"] ?? '',
+        employeeCode: json["employee_code"] ?? '',
+        designation: json["designation"] ?? '',
+        gender: json["gender"] ?? '',
+        phone: json["phone"] ?? '',
+        mobileNo: json["mobile_no"] ?? '',
+        image: json["image"] ?? '',
+        birthDate: json["birth_date"] ?? '',
       );
+
 
   Map<String, dynamic> toJson() => {
     "full_name": fullName,

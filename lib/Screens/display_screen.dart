@@ -19,7 +19,7 @@ class DataDisplayScreen extends StatelessWidget {
     final Map<String, dynamic> details = data['data'] ?? {};
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Label Details"),
         centerTitle: true,
@@ -31,6 +31,7 @@ class DataDisplayScreen extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
+          color:Colors.white,
           elevation: 6,
           shadowColor: Colors.blue.withOpacity(0.3),
           child: Padding(
