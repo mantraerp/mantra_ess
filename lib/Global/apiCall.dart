@@ -151,7 +151,7 @@ Future<dynamic> apiLogout() async {
   int statusCode = response.statusCode;
 
   if (statusCode == 200) {
-    Get.offAll(loginPage());
+    Get.offAll(LoginPage());
   } else {
     return _handleFailResponse(response);
   }
@@ -199,7 +199,7 @@ Future<dynamic> apiGetUserProfile() async {
     headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json"},
   );
   int statusCode = response.statusCode;
-
+  print(statusCode);
   if (statusCode == 200) {
     final UserProfileResponse res = userProfileResponseFromJson(response.body);
     return res;
@@ -452,5 +452,23 @@ Future<Map<String, dynamic>?> apiHolidayList() async {
     }
   } catch (e) {
     return {"error": "No Data found for this API: $e"};
+  }
+}
+
+Future<dynamic> apiExpenseClaimList(
+    String fromDate, String toDate, int start) async {
+  final String EmployeeCode = box.read('employee_code');
+  final sid = box.read(SID);
+  String baseUrl =
+      "$GetExpenseClaims?employee_code=$EmployeeCode&from_date=$fromDate&to_date=$toDate";
+
+  final response = await http.get(Uri.parse(baseUrl), headers: {'Cookie': 'sid=$sid'});
+  final statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    final res = jsonDecode(response.body);
+    return res;
+  } else {
+    return _handleFailResponse(response);
   }
 }

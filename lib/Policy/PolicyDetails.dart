@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 
@@ -10,8 +9,8 @@ class PolicyDetailsPage extends StatefulWidget {
   @override
   State<PolicyDetailsPage> createState() => _PolicyDetailsPageState();
 }
+
 class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
-  // dynamic policyData, Recipients;
   Map<String, dynamic>? policyData;
   List<Map<String, dynamic>> Recipients = [];
   bool isLoading = true;
@@ -22,7 +21,6 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
     super.initState();
     fetchPolicyDetails();
   }
-
 
   Future<void> fetchPolicyDetails() async {
     setState(() {
@@ -59,11 +57,31 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Policy Details')),
+      appBar: AppBar(
+        title: const Text(
+          'Policy Details',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0072ff), Color(0xFF00c6ff)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text(errorMessage))
+          ? Center(
+        child: Text(
+          errorMessage,
+          style: const TextStyle(color: Colors.red, fontSize: 16),
+        ),
+      )
           : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: buildPolicyForm(),
@@ -76,109 +94,80 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // First Card
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(12),
+        _buildCard(
+          title: 'Policy & Insurance',
+          icon: Icons.policy,
+          color: Colors.blue.shade50,
+          trailing: _buildStatusTag(p),
+          child: _buildLeftColumn(p),
+        ),
+        const SizedBox(height: 16),
+        _buildCard(
+          title: 'Policy Reminder Details',
+          icon: Icons.notifications_active,
+          color: Colors.green.shade50,
+          child: _buildRightColumn(p),
+        ),
+        if (p['details'] != null && p['details'].toString().trim().isNotEmpty)
+          const SizedBox(height: 16),
+        if (p['details'] != null && p['details'].toString().trim().isNotEmpty)
+          _buildCard(
+            title: 'Policy Details',
+            icon: Icons.description,
+            color: Colors.white,
+            child: _buildDetails(p),
           ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      ],
+    );
+  }
+
+  Widget _buildCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    Widget? trailing,
+    required Widget child,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade300,
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Policy And Insurance',
-                    style: TextStyle(
-                      fontSize: 20,
+                  Icon(icon, color: Colors.indigo, size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.indigo,
                     ),
                   ),
-                  _buildStatusTag(p),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _buildLeftColumn(p)),
-                  const SizedBox(width: 20),
-                  // Expanded(child: _buildRightColumn(p)),
-                ],
-              ),
-
+              if (trailing != null) trailing,
             ],
           ),
-        ),
-
-        // Space between cards (one row height)
-        const SizedBox(height: 16),
-
-        // Second Card
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Policy Reminder Details',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.indigo,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: _buildRightColumn(p)),
-                  const SizedBox(width: 20),
-                  // You can use another _buildRightColumn here if needed
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        //Details Card
-        if (p['details'] != null && p['details'].toString().trim().isNotEmpty)
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    'Policy Details',
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      // decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _buildDetails(p), // full-width paragraph
-              ],
-            ),
-          ),
-      ],
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
     );
   }
 
@@ -198,7 +187,7 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
         _buildField('Insured Name', p['insured_name']),
         _buildField('Insured Address', p['insured_address']),
         _buildField('Total Insured', p['total_sum_insured']),
-        _buildField('claim', p['claim']),
+        _buildField('Claim', p['claim']),
       ],
     );
   }
@@ -209,7 +198,7 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
       children: [
         _buildReminderField('First Reminder', p['reminder_1']),
         _buildField('Reminder Before Days', p['reminder1_before_days']),
-        _buildReminderField('Second Reminders', p['reminder_2']),
+        _buildReminderField('Second Reminder', p['reminder_2']),
         _buildField('Second Reminder Before Days', p['reminder2_before_days']),
         _buildReminderField('Third Reminder', p['reminder_3']),
         _buildField('Third Reminder Before Days', p['reminder3_before_days']),
@@ -217,21 +206,15 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
     );
   }
 
-
   Widget _buildDetails(Map<String, dynamic> p) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          p['details'] ?? '-',
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black87,
-            height: 1.5, // adds line spacing for readability
-          ),
-          textAlign: TextAlign.left, // ensures left alignment
-        ),
-      ],
+    return Text(
+      p['details'] ?? '-',
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.black87,
+        height: 1.6,
+      ),
+      textAlign: TextAlign.left,
     );
   }
 
@@ -242,19 +225,20 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 160,
+            width: 170,
             child: Text(
-              label,
+              '$label:',
               style: const TextStyle(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: Colors.black87,
+                fontSize: 14,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value?.toString() ?? '-',
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: Colors.black87, fontSize: 14),
             ),
           ),
         ],
@@ -269,18 +253,20 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
     } else if (value == 0 || value == '0') {
       iconWidget = const Icon(Icons.cancel, color: Colors.red, size: 20);
     } else {
-      iconWidget = const SizedBox(); // no icon for other values
+      iconWidget = const SizedBox.shrink();
     }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              // style: const TextStyle(fontSize: 16),
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
+              ),
             ),
           ),
           iconWidget,
@@ -291,28 +277,42 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
 
   Widget _buildStatusTag(Map<String, dynamic> p) {
     String statusText = 'NEW';
-    Color statusColor = Colors.green;
+    Color bgColor = Colors.green;
+    IconData icon = Icons.fiber_new_rounded;
 
     if (p['expired'] == 1) {
       statusText = 'EXPIRED';
-      statusColor = Colors.red;
+      bgColor = Colors.red;
+      icon = Icons.cancel_outlined;
     } else if (p['renew'] == 1) {
       statusText = 'RENEW';
-      statusColor = Colors.yellow.shade700;
+      bgColor = Colors.orange;
+      icon = Icons.refresh_rounded;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: statusColor,
+        gradient: LinearGradient(
+          colors: [bgColor.withOpacity(0.8), bgColor.withOpacity(0.5)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        statusText,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            statusText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }

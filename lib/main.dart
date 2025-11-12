@@ -29,7 +29,7 @@ Future<void> main() async {
       home: const LaunchScreen(),
       navigatorKey: navigatorKey,
       routes: <String, WidgetBuilder>{
-        '/LoginPage': (BuildContext context) => loginPage(),
+        '/LoginPage': (BuildContext context) => LoginPage(),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Georgia', textTheme: const TextTheme()),

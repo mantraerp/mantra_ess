@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 
 class HolidayList extends StatefulWidget {
@@ -9,127 +11,198 @@ class HolidayList extends StatefulWidget {
 }
 
 class HolidayListState extends State<HolidayList> {
-  List<dynamic> hilidayData = [];
+  List<dynamic> holidayData = [];
+  List<dynamic> filteredHolidays = [];
   String errorMessage = '';
   bool isLoading = true;
+
+  DateTime _focusedDay = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    fetchPolicyList();
+    fetchHolidayList();
   }
 
-  Future<void> fetchPolicyList() async {
+  Future<void> fetchHolidayList() async {
     try {
       var data = await apiHolidayList();
-      if (data != null) {
+      if (data != null && data['data'] != null) {
         setState(() {
-          hilidayData = data['data'];
+          holidayData = data['data'];
           _sortHolidays();
+          _filterCurrentMonth();
           isLoading = false;
         });
       } else {
         setState(() {
           isLoading = false;
-          errorMessage = 'No policy data found';
+          errorMessage = 'No holiday data found';
         });
       }
     } catch (e) {
       setState(() {
-        hilidayData = [];
+        holidayData = [];
         errorMessage = 'Error fetching data: $e';
       });
     }
   }
 
-
   void _sortHolidays() {
-    hilidayData.sort((a, b) {
-      var dateA = a['holiday_date'].split('-');
-      var dateB = b['holiday_date'].split('-');
+    holidayData.sort((a, b) {
+      var dateA = DateFormat("dd-MM-yyyy").parse(a['holiday_date']);
+      var dateB = DateFormat("dd-MM-yyyy").parse(b['holiday_date']);
+      return dateA.compareTo(dateB);
+    });
+  }
 
-      int yearA = int.parse(dateA[2]);
-      int yearB = int.parse(dateB[2]);
-      if (yearA != yearB) return yearA.compareTo(yearB);
+  void _filterCurrentMonth() {
+    filteredHolidays = holidayData.where((holiday) {
+      DateTime date = DateFormat("dd-MM-yyyy").parse(holiday['holiday_date']);
+      return date.month == _focusedDay.month && date.year == _focusedDay.year;
+    }).toList();
+  }
 
-      int monthA = int.parse(dateA[1]);
-      int monthB = int.parse(dateB[1]);
-      if (monthA != monthB) return monthA.compareTo(monthB);
+  List<DateTime> _getHolidayDates() {
+    return holidayData.map((h) {
+      DateTime d = DateFormat("dd-MM-yyyy").parse(h['holiday_date']);
+      return DateTime(d.year, d.month, d.day);
+    }).toList();
+  }
 
-      int dayA = int.parse(dateA[0]);
-      int dayB = int.parse(dateB[0]);
-      return dayA.compareTo(dayB);
+  void _onMonthChanged(DateTime newDate) {
+    setState(() {
+      _focusedDay = newDate;
+      _filterCurrentMonth();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final holidayDates = _getHolidayDates();
+    const holidayColor = Color(0xFFBBDEFB); // Light blue color
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Holiday List'),
-        // backgroundColor: Color(white),
+        title: const Text('Holiday Calendar'),
+        centerTitle: true,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
           ? Center(child: Text(errorMessage))
-          : ListView.builder(
-        itemCount: hilidayData.length,
-        itemBuilder: (context, index) {
-          var holiday = hilidayData[index];
-          String holidayDate = holiday['holiday_date'];
-          String description = holiday['description'];
-
-          var dateParts = holidayDate.split('-');
-          String day = dateParts[0];
-          String month = _getMonthName(int.parse(dateParts[1]));
-          String year = dateParts[2];
-
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            elevation: 4,
-            child: ListTile(
-              contentPadding: const EdgeInsets.all(16),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$day $month, $year',
+          : Column(
+        children: [
+          // Calendar
+          Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: TableCalendar(
+              firstDay: DateTime.utc(2020, 1, 1),
+              lastDay: DateTime.utc(2035, 12, 31),
+              focusedDay: _focusedDay,
+              calendarFormat: CalendarFormat.month,
+              headerStyle: HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.indigo),
+                rightChevronIcon: const Icon(Icons.chevron_right, color: Colors.indigo),
+                titleTextStyle: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              onPageChanged: (focusedDay) {
+                _onMonthChanged(focusedDay);
+              },
+              // Disable day selection
+              selectedDayPredicate: (_) => false,
+              onDaySelected: (_, __) {},
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder: (context, day, focusedDay) {
+                  final isHoliday = holidayDates.any((d) =>
+                  d.year == day.year &&
+                      d.month == day.month &&
+                      d.day == day.day);
+                  if (isHoliday) {
+                    return Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: holidayColor,
+                        shape: BoxShape.circle, // round circle
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${day.day}',
                         style: const TextStyle(
-                          fontSize: 18,
+                          color: Colors.black87,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
-                  // Right side: Holiday Description
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        description,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                ],
+                    );
+                  }
+                  return null;
+                },
               ),
             ),
-          );
-        },
+          ),
+
+          // Holiday List Below Calendar
+          Expanded(
+            child: filteredHolidays.isEmpty
+                ? const Center(
+              child: Text(
+                'No holidays this month',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            )
+                : ListView.builder(
+              itemCount: filteredHolidays.length,
+              itemBuilder: (context, index) {
+                var holiday = filteredHolidays[index];
+                String holidayDate = holiday['holiday_date'];
+                String description = holiday['description'];
+                DateTime parsedDate =
+                DateFormat("dd-MM-yyyy").parse(holidayDate);
+                String formattedDate =
+                DateFormat("d MMM, yyyy").format(parsedDate);
+
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                      vertical: 6, horizontal: 16),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.event,
+                        color: Colors.indigo),
+                    title: Text(
+                      description,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(formattedDate),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June', 'July',
-      'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
   }
 }

@@ -6,181 +6,203 @@ import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Login/OTPPage.dart';
 import 'package:mantra_ess/dashboard.dart';
 
-class loginPage extends StatefulWidget {
-  const loginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  _loginPageState createState() => _loginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _loginPageState extends State<loginPage> {
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController txtEmail = TextEditingController();
   final TextEditingController txtPassword = TextEditingController();
   bool serviceCall = false;
-  bool showPassword = true;
+  bool showPassword = false;
 
   @override
   void initState() {
     super.initState();
 
-    showPassword = true;
-    _fillIDPassword();
   }
 
-  _fillIDPassword() async {
-    txtEmail.text = "ravi.patel@mantratec.com";
-    txtPassword.text = "Mantra@123";
-  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: appWhite, body: screenDesign(context));
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFf6f8fb), Color(0xFFdce3f0)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(child: _buildLoginForm(context)),
+      ),
+    );
   }
 
-  Widget screenDesign(BuildContext context) {
-    return Center(
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        children: <Widget>[
-          const SizedBox(height: 40.0),
+  Widget _buildLoginForm(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Logo
           Image.asset(
             'assets/MantraLogo.png',
-            width: deviceWidth,
-            height: 120.0,
+            width: 160,
+            height: 120,
           ),
-          const SizedBox(height: 30.0),
+          const SizedBox(height: 40),
+
+          // Title
+          Text(
+            "Welcome Back",
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Sign in to continue",
+            style: TextStyle(color: Colors.grey, fontSize: 15),
+          ),
+          const SizedBox(height: 40),
+
+          // Email Field
           TextFormField(
             controller: txtEmail,
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.cancel),
+              prefixIcon: const Icon(Icons.email_outlined),
+              suffixIcon: txtEmail.text.isNotEmpty
+                  ? IconButton(
+                icon: const Icon(Icons.cancel_outlined),
                 onPressed: () {
                   txtEmail.clear();
-                },
-              ),
-              labelText: "Enter your email",
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                borderSide: const BorderSide(),
-              ),
-            ),
-            validator: (val) {
-              if (val!.isEmpty) {
-                return "Email cannot be empty";
-              } else {
-                return null;
-              }
-            },
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 30.0),
-          TextFormField(
-            obscureText: showPassword,
-            controller: txtPassword,
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                icon: Icon(
-                  showPassword ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  if (showPassword) {
-                    showPassword = false;
-                  } else {
-                    showPassword = true;
-                  }
                   setState(() {});
                 },
-              ),
-              labelText: "Enter your password",
+              )
+                  : null,
+              labelText: "Email",
+              filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                borderSide: const BorderSide(),
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black26),
               ),
-              //fillColor: Colors.green
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                const BorderSide(color: Color(0xFF3E64FF), width: 1.2),
+              ),
             ),
-            validator: (val) {
-              if (val!.isEmpty) {
-                return "Password cannot be empty";
-              } else {
-                return null;
-              }
-            },
-            keyboardType: TextInputType.text,
+            keyboardType: TextInputType.emailAddress,
+            onChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: 50.0),
-          SizedBox(
-            height: 50,
-            width: 150,
-            child: MaterialButton(
-              height: 40.0,
-              minWidth: 135.0,
-              color: Colors.white,
-              textColor: appBlack,
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(
-                  color: appBlack,
-                  width: 0.5,
-                  style: BorderStyle.solid,
+          const SizedBox(height: 20),
+
+          // Password Field
+          TextFormField(
+            controller: txtPassword,
+            obscureText: !showPassword,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.lock_outline),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  showPassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                 ),
-                borderRadius: BorderRadius.circular(5),
+                onPressed: () {
+                  setState(() {
+                    showPassword = !showPassword;
+                  });
+                },
               ),
-              onPressed: () {
-                // if(txtEmail.text.isEmpty)
-                // {
-                //   showAlert(deskApplicationTitle, "Please enter your email ID.");
-                // }
-                // else if(txtPassword.text.isEmpty)
-                // {
-                //   showAlert(deskApplicationTitle, "Please enter your password.");
-                // }
-                // else
-                // {
-                actLoginCall(context);
-                // }
-              },
+              labelText: "Password",
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.black26),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide:
+                const BorderSide(color: Color(0xFF3E64FF), width: 1.2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 35),
+
+          // Login Button
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3E64FF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 4,
+                shadowColor: Colors.blueAccent.withOpacity(0.3),
+              ),
+              onPressed: serviceCall ? null : () => actLoginCall(context),
               child: serviceCall
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.transparent,
-                        valueColor: AlwaysStoppedAnimation<Color>(appGrayDark),
-                      ),
-                    )
-                  : mantraLabel(
-                      'Login',
-                      18,
-                      appGray,
-                      TextAlign.left,
-                      FontWeight.w500,
-                      1,
-                    ),
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+                  : const Text(
+                "Login",
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 60.0),
+
+          const SizedBox(height: 25),
+
+          // Footer
+          // TextButton(
+          //   onPressed: () {},
+          //   child: const Text(
+          //     "Forgot password?",
+          //     style: TextStyle(
+          //       fontSize: 15,
+          //       color: Color(0xFF3E64FF),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
   }
 
   void actLoginCall(BuildContext context) async {
-    if (serviceCall) {
-      return;
-    }
-    setState(() {
-      serviceCall = true;
-    });
+    if (serviceCall) return;
+
+    setState(() => serviceCall = true);
 
     prefsGlobal.setString(NUDMantraEmail, txtEmail.text);
     prefsGlobal.setString(NUDMantraPass, txtPassword.text);
+
     apiLogin().then((response) {
-      serviceCall = false;
+      setState(() => serviceCall = false);
+
       if (response.runtimeType == bool) {
         setState(() {});
       } else {
@@ -196,15 +218,12 @@ class _loginPageState extends State<loginPage> {
           String cookie = "";
           for (var key in response.keys) {
             if (!['message', 'full_name', 'home_page'].contains(key)) {
-              if (cookie.isNotEmpty) {
-                cookie += ";";
-              }
+              if (cookie.isNotEmpty) cookie += ";";
               cookie += "$key=${response[key]!}";
             }
           }
 
           headers['Cookie'] = cookie;
-
           Navigator.push(
             context,
             CupertinoPageRoute(builder: (context) => dashboard()),

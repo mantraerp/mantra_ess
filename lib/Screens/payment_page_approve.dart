@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../Models/payment_entry_model.dart';
 import '../Models/salary_slip_model.dart';
 import 'payment_api.dart';
-import 'payment_filter_screen.dart';
+import 'payment_page_approve_filter_screen.dart';
 import 'payment_page_po_detail.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -12,23 +12,21 @@ import '../Global/webService.dart'; // if you store frappeUserEmail or token her
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 final box = GetStorage();
-class PaymentPage extends StatefulWidget {
-  const PaymentPage({super.key});
+class PaymentApprovePage extends StatefulWidget {
+  const PaymentApprovePage({super.key});
 
   @override
-  State<PaymentPage> createState() => _PaymentPageState();
+  State<PaymentApprovePage> createState() => _PaymentPageState();
 }
 
-class _PaymentPageState extends State<PaymentPage> {
+class _PaymentPageState extends State<PaymentApprovePage> {
   List<PaymentEntry> payments = [];
   Map<String, List<PaymentEntry>> groupedPayments = {};
   Set<String> selectedPaymentIds = {};
   Set<String> expandedParties = {};
   bool loading = false;
 
-  bool usePayroll = false;
-  String? selectedMonth;
-  String? selectedPayrollEntry;
+
   Map<String, dynamic>? selectedBank;
   Map<String, dynamic>? selectedBankAccount;
 
@@ -51,73 +49,6 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
 
-  Future<void> _sendOtp() async {
-    try {
-      setState(() => _isProcessing = true);
-      final String userEmail = box.read('user_email');
-      final url = Uri.parse("$PaymentPageSendOtp?email=$userEmail");
-      final response = await http.get(url);
-
-      final data = jsonDecode(response.body);
-      print(data);
-      if (data["message"]["status"] == "success") {
-        _showSnack("OTP sent successfully!");
-        _showOtpDialog();
-      } else {
-        _showSnack(data["message"]["message"] ?? "Failed to send OTP");
-      }
-    } catch (e) {
-      _showSnack("Error sending OTP: $e");
-    } finally {
-      setState(() => _isProcessing = false);
-    }
-  }
-
-  Future<void> _verifyOtp(String otp) async {
-    if (otp.isEmpty) {
-      _showSnack("Please enter OTP");
-      return;
-    }
-
-    try {
-      setState(() => _isProcessing = true);
-
-      final String userEmail = box.read('user_email');
-      final url = Uri.parse("$PaymentPageVerifyOtp");
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": userEmail,
-          "otp": otp,
-          "selected_ids": selectedPaymentIds.toList(),
-          "bank_account": selectedBankAccount?['name'],
-          "use_payroll": usePayroll,
-          "payroll_entry":selectedPayrollEntry
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-      print(data);
-      if (data['message']["status"] == "success") {
-        _showSnack(data["message"]["message"]);
-        Navigator.pop(context); // close OTP dialog
-
-        // 🔹 Call your upload bank file logic or refresh list
-        setState(() {
-          payments.removeWhere((p) => selectedPaymentIds.contains(p));
-          selectedPaymentIds.clear();
-        });
-        await fetchPayments();
-      } else {
-        _showSnack(data["message"] ?? "Invalid OTP");
-      }
-    } catch (e) {
-      _showSnack("Error verifying OTP: $e");
-    } finally {
-      setState(() => _isProcessing = false);
-    }
-  }
 
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -125,78 +56,8 @@ class _PaymentPageState extends State<PaymentPage> {
     );
   }
 
-  void _showConfirmDialog() {
-    if (selectedPaymentIds.isEmpty) {
-      _showSnack("Please select at least one payment or salary slip.");
-      return;
-    }
 
-    final totalAmt = payments
-        .where((p) => selectedPaymentIds.contains(p.id))
-        .fold(0.0, (sum, p) => sum + p.amount);
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text("Confirm Payment"),
-        content: Text(
-          "You have selected ${selectedPaymentIds.length} transactions.\n"
-              "Total Amount: ₹${totalAmt.toStringAsFixed(2)}\n\n"
-              "Do you want to send OTP for confirmation?",
-          style: const TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _sendOtp();
-            },
-            child: const Text("Send OTP"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showOtpDialog() {
-    _otpController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text("Verify OTP"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Enter the OTP sent to your registered email:"),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _otpController,
-              decoration: const InputDecoration(
-                labelText: "Enter OTP",
-                border: OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () => _verifyOtp(_otpController.text.trim()),
-            child: const Text("Verify OTP"),
-          ),
-        ],
-      ),
-    );
-  }
 
 
   Future<void> fetchPayments() async {
@@ -204,25 +65,11 @@ class _PaymentPageState extends State<PaymentPage> {
     try {
       List<PaymentEntry> data = [];
 
-      if (usePayroll && selectedPayrollEntry != null) {
-        final salarySlipsData =
-        await PaymentAPI.getSalarySlips(selectedPayrollEntry!);
-        final salarySlips =
-        salarySlipsData.map((s) => SalarySlip.fromJson(s)).toList();
 
-        data = salarySlips
-            .map((s) => PaymentEntry(
-          id: s.id,
-          partyName: s.partyName,
-          amount: s.amount,
-          remarks: s.remarks,
-        ))
-            .toList();
-      } else {
-        data = await PaymentAPI.fetchPayments(
+        data = await PaymentAPI.fetchPaymentApprovePayments(
           bankAccount: selectedBankAccount?['name'],
         );
-      }
+
 
       setState(() {
         payments = data;
@@ -251,19 +98,15 @@ class _PaymentPageState extends State<PaymentPage> {
       barrierDismissible: true,
       barrierColor: Colors.transparent,
       builder: (_) => PaymentFilterScreen(
-        usePayroll: usePayroll,
-        selectedMonth: selectedMonth,
-        selectedPayrollEntry: selectedPayrollEntry,
+
         selectedBank: selectedBank,
         selectedBankAccount: selectedBankAccount,
-      ),
+        ),
     );
 
     if (result != null) {
       setState(() {
-        usePayroll = result['usePayroll'];
-        selectedMonth = result['month'];
-        selectedPayrollEntry = result['payrollEntry'];
+
         selectedBank = result['bank'];
         selectedBankAccount = result['bankAccount'];
       });
@@ -306,13 +149,13 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
-  Future<void> holdPayment(PaymentEntry entry) async {
+  Future<void> approvePayment(PaymentEntry entry) async {
     try {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Confirm Hold"),
-          content: const Text("Are you sure you want to hold this salary slip?"),
+          title: const Text("Confirm Approve"),
+          content: const Text("Are you sure you want to approve this payment?"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -321,10 +164,10 @@ class _PaymentPageState extends State<PaymentPage> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orangeAccent,
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
-              child: const Text("Hold"),
+              child: const Text("Approve"),
             ),
           ],
         ),
@@ -332,19 +175,19 @@ class _PaymentPageState extends State<PaymentPage> {
 
       if (confirm != true) return;
 
-      // 🔸 Add your API call here
-      await PaymentAPI.holdSalarySlips(entry.id);
+      await PaymentAPI.approvePaymentEntries([entry.id]);
+
       setState(() {
         payments.removeWhere((p) => p.id == entry.id);
         groupedPayments = _groupByParty(payments);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment held successfully")),
+        const SnackBar(content: Text("Payment Approved successfully")),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error holding payment: $e")),
+        SnackBar(content: Text("Error approving payment: $e")),
       );
     }
   }
@@ -393,6 +236,50 @@ class _PaymentPageState extends State<PaymentPage> {
     }
   }
 
+  Future<void> HoldPayment(PaymentEntry entry) async {
+    try {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Confirm Hold"),
+          content: const Text("Are you sure you want to hold this payment?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Hold"),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
+      await PaymentAPI.holdPaymentEntries([entry.id]);
+
+      setState(() {
+        payments.removeWhere((p) => p.id == entry.id);
+        groupedPayments = _groupByParty(payments);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Payment hold successfully")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error hold payment: $e")),
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final f = NumberFormat.currency(symbol: "₹", decimalDigits: 2);
@@ -412,7 +299,7 @@ class _PaymentPageState extends State<PaymentPage> {
           : payments.isEmpty
           ? Center(
         child: Text(
-          usePayroll ? "No salary slips found" : "No payments found",
+          "No payments found",
           style: const TextStyle(
               fontSize: 16, fontWeight: FontWeight.w500),
         ),
@@ -452,24 +339,8 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                 ),
 
-                // ✅ Make Payment Button (only shown when something is selected)
-                if (selectedPaymentIds.isNotEmpty)
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.payment, size: 20),
-                    onPressed: _isProcessing ? null : _showConfirmDialog,
-                    label: Text(
-                      _isProcessing ? "Processing..." : "Make Payment",
-                      style: const TextStyle(fontSize: 14),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
+
+
               ],
             ),
           ),
@@ -610,52 +481,55 @@ class _PaymentPageState extends State<PaymentPage> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 8, // horizontal space between buttons
+                              runSpacing: 6, // vertical space when wrapping
+                              alignment: WrapAlignment.end,
                               children: [
-                                if (usePayroll)
-                                  OutlinedButton(
-                                    onPressed: () => holdPayment(entry),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.orangeAccent,
-                                      side: const BorderSide(color: Colors.orangeAccent),
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: const Text("Hold"),
-                                  )
-                                else ...[
-                                  OutlinedButton(
-                                    onPressed: () => rejectPayment(entry),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: Colors.redAccent,
-                                      side: const BorderSide(color: Colors.redAccent),
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: const Text("Reject"),
+                                OutlinedButton(
+                                  onPressed: () => HoldPayment(entry),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.orangeAccent,
+                                    side: const BorderSide(color: Colors.orangeAccent),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   ),
-                                  const SizedBox(width: 8),
-                                  ElevatedButton(
-                                    onPressed: () => showPaymentDetail(entry.id),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.blueAccent,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                    child: const Text("Get Details"),
+                                  child: const Text("Hold"),
+                                ),
+                                OutlinedButton(
+                                  onPressed: () => approvePayment(entry),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.green,
+                                    side: const BorderSide(color: Colors.greenAccent),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   ),
-                                ],
+                                  child: const Text("Approve"),
+                                ),
+                                OutlinedButton(
+                                  onPressed: () => rejectPayment(entry),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.redAccent,
+                                    side: const BorderSide(color: Colors.redAccent),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text("Reject"),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => showPaymentDetail(entry.id),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blueAccent,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  ),
+                                  child: const Text("Get Details"),
+                                ),
                               ],
                             ),
+
 
                           ],
                         ),

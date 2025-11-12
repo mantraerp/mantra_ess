@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:mantra_ess/Controllers/profile_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
@@ -13,93 +12,88 @@ class ProfileScreen extends StatelessWidget {
     return GetBuilder<ProfileController>(
       builder: (controller) {
         return Scaffold(
-          appBar: AppBar(title: Text('Profile'), centerTitle: true),
+          appBar: AppBar(
+            title: Text('Profile'),
+            centerTitle: true,
+            backgroundColor: Colors.blue,
+          ),
           body: controller.profileData != null
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 20),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundImage: NetworkImage(
-                            controller.profileData?.value.image ?? '',
-                            headers: controller.getImageHeaders(),
-                          ),
-                          backgroundColor: Colors.grey.shade200,
-                        ),
+              ? SingleChildScrollView(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 10),
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: (controller.profileData?.value.image != null &&
+                      controller.profileData!.value.image.isNotEmpty)
+                      ? NetworkImage(
+                    controller.profileData!.value.image,
+                    headers: controller.getImageHeaders(),
+                  )
+                      : null, // no image
+                  child: (controller.profileData?.value.image == null ||
+                      controller.profileData!.value.image.isEmpty)
+                      ? const Icon(
+                    Icons.person,
+                    size: 50,
+                    color: Colors.grey,
+                  )
+                      : null,
+                ),
 
-                        Text(
-                          controller.profileData!.value.fullName,
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Text(
-                          controller.profileData!.value.designation,
-                          style: TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        children: [
-                          dataTile(
-                            'Gender',
-                            controller.profileData!.value.gender,
-                          ),
-                          dataTile(
-                            'Birth Date',
-                            controller.profileData!.value.birthDate,
-                          ),
-                          dataTile(
-                            'Email',
-                            controller.profileData!.value.email,
-                          ),
-                          dataTile(
-                            'Employee Code',
-                            controller.profileData!.value.employeeCode,
-                          ),
-                          dataTile(
-                            'Mobile Number',
-                            controller.profileData!.value.mobileNo,
-                          ),
-                          dataTile(
-                            'Phone',
-                            controller.profileData!.value.phone,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Spacer(flex: 1),
-                    GestureDetector(
-                      onTap: () => apiLogout(),
-                      child: Container(
-                        width: double.infinity,
-                        margin: EdgeInsets.all(8),
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(
-                              color: appWhite,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
+                SizedBox(height: 12),
+                Text(
+                  controller.profileData!.value.fullName,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  controller.profileData!.value.designation,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+                SizedBox(height: 20),
+                Column(
+                  children: [
+                    dataTile('Gender', controller.profileData!.value.gender),
+                    dataTile('Birth Date', controller.profileData!.value.birthDate),
+                    dataTile('Email', controller.profileData!.value.email),
+                    dataTile('Employee Code', controller.profileData!.value.employeeCode),
+                    dataTile('Mobile Number', controller.profileData!.value.mobileNo),
+                    dataTile('Phone', controller.profileData!.value.phone),
                   ],
-                )
-              : Center(child: Text('No data')),
+                ),
+                SizedBox(height: 30),
+                GestureDetector(
+                  onTap: () => _showLogoutDialog(context),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: appWhite,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+              : Center(child: Text('No data available')),
         );
       },
     );
@@ -107,19 +101,48 @@ class ProfileScreen extends StatelessWidget {
 
   Card dataTile(String title, String value) {
     return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.symmetric(vertical: 6),
+      color: Colors.grey[100],
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: TextStyle(fontSize: 14, color: Colors.black54)),
-            Text(value, style: TextStyle(fontSize: 16, color: Colors.black87)),
+            Text(title, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+            Flexible(
+              child: Text(
+                value,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+                textAlign: TextAlign.right,
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Confirm Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text('No'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              apiLogout();
+            },
+            child: Text('Yes'),
+          ),
+        ],
       ),
     );
   }

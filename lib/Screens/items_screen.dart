@@ -14,12 +14,14 @@ class ItemsScreen extends StatelessWidget {
     NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FB),
       appBar: AppBar(
         title: Text(
           title,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: itemList.isEmpty
           ? const Center(
@@ -37,6 +39,7 @@ class ItemsScreen extends StatelessWidget {
               double.tryParse("${item?['amount'] ?? 0}") ?? 0;
 
           return Card(
+            color: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -61,7 +64,7 @@ class ItemsScreen extends StatelessWidget {
                       Expanded(
                         child: _labelValue(
                           "Item Name",
-                          item?['custom_item_description'] ??
+                          item?['item_name'] ??
                               item?['description'] ??
                               '',
                           align: TextAlign.right,
