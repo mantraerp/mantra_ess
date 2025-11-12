@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mantra_ess/Global/constant.dart';
 import '../Global/webService.dart';
 import 'items_screen.dart';
 import 'tax_and_charges.dart';
@@ -46,10 +47,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       final doctype = "Sales Order";
       final response = await http.get(
         Uri.parse("$GetActivityLogs?doctype=$doctype&name=${widget.salesOrderName}"),
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

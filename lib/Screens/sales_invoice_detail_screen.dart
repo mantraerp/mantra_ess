@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mantra_ess/Global/constant.dart';
 import '../Global/webService.dart';
 import 'items_screen.dart';
 import 'tax_and_charges.dart';
@@ -46,10 +47,7 @@ class _SalesInvoiceDetailScreenState extends State<SalesInvoiceDetailScreen> {
       final doctype = "Sales Invoice";
       final response = await http.get(
         Uri.parse("$GetActivityLogs?doctype=$doctype&name=${widget.salesInvoiceName}"),
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -75,10 +73,7 @@ class _SalesInvoiceDetailScreenState extends State<SalesInvoiceDetailScreen> {
     try {
       final sid = box.read('SID');
       final url = Uri.parse("$GetSalesInvoiceDetail?sales_invoice=${widget.salesInvoiceName}");
-      final response = await http.get(url, headers: {
-        'Cookie': 'sid=$sid',
-        'Accept': 'application/json',
-      });
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

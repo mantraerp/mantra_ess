@@ -86,7 +86,7 @@ class _PaymentPageState extends State<PaymentPage> {
       final url = Uri.parse("$PaymentPageVerifyOtp");
       final response = await http.post(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: headers,
         body: jsonEncode({
           "email": userEmail,
           "otp": otp,

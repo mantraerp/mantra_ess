@@ -41,7 +41,7 @@ class _ApiDropdownState extends State<ApiDropdown> {
     try {
 
       final sid = box.read(SID);
-      final res = await http.get(Uri.parse(widget.apiUrl),headers: {'Cookie': 'sid=$sid'});
+      final res = await http.get(Uri.parse(widget.apiUrl),headers: headers);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
         setState(() {

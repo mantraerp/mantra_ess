@@ -8,6 +8,7 @@ import '../Global/constant.dart';
 import '../Global/webService.dart';
 import 'delivery_note_detail_screen.dart';
 import 'filter_screen.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 class DeliveryNoteListScreen extends StatefulWidget {
   const DeliveryNoteListScreen({Key? key}) : super(key: key);
@@ -62,7 +63,7 @@ class _DeliveryNoteListScreenState extends State<DeliveryNoteListScreen> {
       final sid = box.read(SID);
       final response = await http.get(
         Uri.parse(GetDeliveryNoteStatus),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -122,7 +123,7 @@ class _DeliveryNoteListScreenState extends State<DeliveryNoteListScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

@@ -6,7 +6,7 @@ import '../Global/webService.dart';
 import 'items_screen.dart';
 import 'tax_and_charges.dart';
 import 'activity_log_screen.dart';
-
+import 'package:mantra_ess/Global/constant.dart';
 class DeliveryNoteDetailScreen extends StatefulWidget {
   final String deliveryNoteName;
 
@@ -46,10 +46,7 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
       final doctype = "Delivery Note";
       final response = await http.get(
         Uri.parse("$GetActivityLogs?doctype=$doctype&name=${widget.deliveryNoteName}"),
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -75,10 +72,7 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
     try {
       final sid = box.read('SID');
       final url = Uri.parse("$GetDeliveryNoteDetail?delivery_note=${widget.deliveryNoteName}");
-      final response = await http.get(url, headers: {
-        'Cookie': 'sid=$sid',
-        'Accept': 'application/json',
-      });
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

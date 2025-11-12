@@ -63,7 +63,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
       final sid = box.read(SID);
       final response = await http.get(
         Uri.parse(GetPurchaseOrderStatus),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -123,7 +123,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

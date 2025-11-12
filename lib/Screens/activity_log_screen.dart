@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import '../Global/webService.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 class BaseActivityScreen extends StatefulWidget {
   final String doctype;
@@ -35,10 +36,7 @@ class _BaseActivityScreenState extends State<BaseActivityScreen> {
       final response = await http.get(
         Uri.parse(
             "$GetActivityLogs?doctype=${widget.doctype}&name=${widget.docname}"),
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/json',
-        },
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

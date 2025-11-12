@@ -6,6 +6,7 @@ import '../Global/webService.dart';
 import 'items_screen.dart';
 import 'tax_and_charges.dart';
 import 'activity_log_screen.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 class MaterialRequestDetailScreen extends StatefulWidget {
   final String materialRequestName;
@@ -46,10 +47,7 @@ class _MaterialRequestDetailScreenState extends State<MaterialRequestDetailScree
       final response = await http.get(
         Uri.parse(
             "$GetActivityLogs?doctype=$doctype&name=${widget.materialRequestName}"),
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/json',
-        },
+        headers:headers,
       );
 
       if (response.statusCode == 200) {
@@ -76,10 +74,7 @@ class _MaterialRequestDetailScreenState extends State<MaterialRequestDetailScree
       final sid = box.read('SID');
       final url = Uri.parse(
           "$GetMateriaRequestDetail?material_request=${widget.materialRequestName}");
-      final response = await http.get(url, headers: {
-        'Cookie': 'sid=$sid',
-        'Accept': 'application/json',
-      });
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

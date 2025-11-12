@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 class ExpenseClaimScreen extends StatefulWidget {
   const ExpenseClaimScreen({super.key});
@@ -47,7 +48,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
       final url = Uri.parse(
           "$GetMasterList?doctype=Expense Claim Type&search_text=");
 
-      final response = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final response = await http.get(url, headers: headers);
       final data = jsonDecode(response.body);
       if (data["data"] != null) {
         setState(() {
@@ -196,7 +197,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
       expenseClaimName = expenseClaimID ?? '';
       final res = await http.post(
         Uri.parse("$DeleteExpenseClaim?row=$rowName&expense_claim=$expenseClaimID"),
-        headers: {"Content-Type": "application/json",'Cookie': 'sid=$sid'},
+        headers: headers,
 
       );
 
@@ -520,7 +521,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
                               var response = await dio.post(
                                 "$uploadAttachment",
                                 data: formData,
-                                options: Options(headers: {"Cookie": "sid=$sid"}),
+                                options: Options(headers: headers),
                               );
 
                               if (response.statusCode == 201) {
@@ -607,7 +608,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
                                     "docname": expenseClaimName ?? '1',
                                   },
                                   options: Options(
-                                      headers: {"Cookie": "sid=$sid"}),
+                                      headers: headers),
                                 );
 
                                 if (response.statusCode == 202) {
@@ -783,7 +784,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
 
       final res = await http.post(
         url,
-        headers: {"Content-Type": "application/json",'Cookie': 'sid=$sid'},
+        headers: headers,
         body: jsonEncode(body),
       );
 

@@ -237,13 +237,13 @@ class _dashboardState extends State<dashboard> {
       serviceCall = true;
     });
 
-    apiGetDashboardMenu().then((response) {
-      serviceCall = false;
-      if (response.runtimeType == bool) {
-        setState(() {});
-      } else {
-        var allKeys = response.keys;
-      }
-    });
+  //   apiGetDashboardMenu().then((response) {
+  //     serviceCall = false;
+  //     if (response.runtimeType == bool) {
+  //       setState(() {});
+  //     } else {
+  //       var allKeys = response.keys;
+  //     }
+  //   });
   }
 }

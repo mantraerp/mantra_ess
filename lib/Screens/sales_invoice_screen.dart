@@ -62,7 +62,7 @@ class _SalesInvoiceListScreenState extends State<SalesInvoiceListScreen> {
       final sid = box.read(SID);
       final response = await http.get(
         Uri.parse(GetSalesInvoiceStatus),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -122,7 +122,7 @@ class _SalesInvoiceListScreenState extends State<SalesInvoiceListScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

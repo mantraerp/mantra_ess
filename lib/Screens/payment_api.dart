@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mantra_ess/Global/constant.dart';
 import '../Models/payment_entry_model.dart';
 import '../Global/webService.dart';
 
@@ -75,10 +76,7 @@ class PaymentAPI {
 
     final response = await http.post(
       url,
-      headers: {
-        "Content-Type": "application/json",
-        // Add Authorization header if needed
-      },
+      headers: headers,
       body: jsonEncode({
         "payment_entry": paymentEntryId,
         "remark": remark,
@@ -170,7 +168,7 @@ class PaymentAPI {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode({"payment_entry_ids": jsonEncode(paymentEntryIds)}),
     );
 
@@ -191,7 +189,7 @@ class PaymentAPI {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode({"payment_entry_ids": jsonEncode(paymentEntryIds)}),
     );
 
@@ -211,7 +209,7 @@ class PaymentAPI {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
+      headers: headers,
       body: jsonEncode({"payment_entry_ids": jsonEncode(paymentEntryIds)}),
     );
 
@@ -233,9 +231,9 @@ class PaymentAPI {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"}
+      headers: headers
     );
-    print(response.statusCode);
+
     if (response.statusCode != 200) {
       throw Exception("Failed to cancel payments: ${response.body}");
     }
