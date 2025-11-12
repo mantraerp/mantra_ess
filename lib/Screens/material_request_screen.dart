@@ -8,6 +8,7 @@ import '../Global/constant.dart';
 import '../Global/webService.dart';
 import 'material_request_detail_screen.dart';
 import 'filter_screen.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 class MaterialRequestScreenListScreen extends StatefulWidget {
   const MaterialRequestScreenListScreen({Key? key}) : super(key: key);
@@ -62,7 +63,7 @@ class _MaterialRequestListScreenState extends State<MaterialRequestScreenListScr
       final sid = box.read(SID);
       final response = await http.get(
         Uri.parse(GetMateriaRequestStatus),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -122,7 +123,7 @@ class _MaterialRequestListScreenState extends State<MaterialRequestScreenListScr
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {

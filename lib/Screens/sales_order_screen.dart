@@ -62,7 +62,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
       final sid = box.read(SID);
       final response = await http.get(
         Uri.parse(GetSalesOrderStatus),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

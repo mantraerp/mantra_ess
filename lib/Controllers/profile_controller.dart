@@ -10,7 +10,8 @@ class ProfileController extends GetxController {
   Rx<UserProfileData>? profileData;
 
   void saveEmployeeCode() async {
-    final res = await apiGetUserProfile();
+    final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
+    final res = await apiGetEmployeeData(phoneNumber);
     print(res);
 
     if (res is UserProfileResponse) {

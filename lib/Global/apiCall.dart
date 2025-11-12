@@ -76,10 +76,7 @@ Future<File?> downloadAndSavePDF(String slipName) async {
       savePath,
       options: Options(
         responseType: ResponseType.bytes,
-        headers: {
-          'Cookie': 'sid=$sid',
-          'Accept': 'application/pdf',
-        },
+        headers: headers,
       ),
     );
     await OpenFilex.open(savePath);
@@ -113,6 +110,7 @@ dynamic _handleFailResponse(dynamic response) {
 
 Future<dynamic> apiLogin() async {
   final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
+  print(phoneNumber);
   final String otp = prefsGlobal.getString(NUDMantraPass)!;
 
   final response = await http.post(
@@ -146,7 +144,7 @@ Future<dynamic> apiLogout() async {
   final sid = box.read(SID);
   final response = await http.post(
     Uri.parse(URLLogout),
-    headers: {'Cookie': 'sid=$sid'},
+    headers: headers,
   );
   int statusCode = response.statusCode;
 
@@ -158,7 +156,7 @@ Future<dynamic> apiLogout() async {
 }
 
 Future<dynamic> apiOTPVerification(String OTP) async {
-  final sid = box.read(SID);
+
   final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
   final String pwd = prefsGlobal.getString(NUDMantraPass)!;
   final String tmp_id = prefsGlobal.getString(NUDMantraTempID)!;
@@ -168,7 +166,7 @@ Future<dynamic> apiOTPVerification(String OTP) async {
     Uri.parse(
       "$URLOTPVerification?user=$phoneNumber&pwd=$pwd&otp=$OTP&tmp_id=$tmp_id",
     ),
-    headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json",},
+    headers:{"Content-Type": "application/json",},
   );
   int statusCode = response.statusCode;
 
@@ -181,7 +179,7 @@ Future<dynamic> apiOTPVerification(String OTP) async {
 
 Future<dynamic> apiGetDashboardMenu() async {
   final sid = box.read(SID);
-  final response = await http.post(Uri.parse(URLGetMenu), headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json",});
+  final response = await http.post(Uri.parse(URLGetMenu), headers:headers);
   int statusCode = response.statusCode;
 
   if (statusCode == 200) {
@@ -191,27 +189,11 @@ Future<dynamic> apiGetDashboardMenu() async {
   }
 }
 
-Future<dynamic> apiGetUserProfile() async {
-  final sid = box.read(SID);
-  final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
-  final response = await http.get(
-    Uri.parse('$URLGetProfile?user=$phoneNumber'),
-    headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json"},
-  );
-  int statusCode = response.statusCode;
-  print(statusCode);
-  if (statusCode == 200) {
-    final UserProfileResponse res = userProfileResponseFromJson(response.body);
-    return res;
-  } else {
-    return _handleFailResponse(response);
-  }
-}
 Future<dynamic> apiGetEmployeeData(String userEmail) async {
-  final sid = box.read(SID);
+
   final String url = "$URLGetProfile?user=$userEmail";
 
-  final response = await http.get(Uri.parse(url),  headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json"});
+  final response = await http.get(Uri.parse(url),  headers:headers);
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
@@ -268,7 +250,7 @@ Future<dynamic> apiSalarySlipList({DateTime? fromDate, DateTime? toDate}) async 
   // ✅ Build final URL
   Uri url = Uri.parse(baseUrl);
 
-  final response = await http.get(url, headers:{'Cookie': 'sid=$sid', "Content-Type": "application/json"});
+  final response = await http.get(url, headers:headers);
   int statusCode = response.statusCode;
 
   if (statusCode == 200) {
@@ -331,7 +313,7 @@ Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final sid = box.read(SID);
-  final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+  final response = await http.get(Uri.parse(url),headers: headers);
 
   int statusCode = response.statusCode;
 
@@ -350,7 +332,7 @@ Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final sid = box.read(SID);
-  final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+  final response = await http.get(Uri.parse(url),headers: headers);
 
   int statusCode = response.statusCode;
 
@@ -369,7 +351,7 @@ Future<String?> apiCheckSerialOrBatchType(String number) async {
         "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.check_serial_or_batch?number=$number";
 
     final sid = box.read(SID);
-    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+    final response = await http.get(Uri.parse(url),headers: headers);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -396,10 +378,10 @@ Future<String?> apiCheckSerialOrBatchType(String number) async {
 //Policy List API
 Future<Map<String, dynamic>?> apiPolicyList() async {
   try {
-    String url = "http://192.168.11.66:8017/api/method/erp_mobile.api.policy.get_policies";
+    String url = "http://192.168.11.66:8014/api/method/erp_mobile.api.policy.get_policies";
 
     final sid = box.read(SID);
-    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+    final response = await http.get(Uri.parse(url),headers:headers);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -416,11 +398,11 @@ Future<Map<String, dynamic>?> apiPolicyList() async {
 Future<Map<String, dynamic>> apifetchPolicyDetails(String policyName) async {
   try{
     String url =
-        "http://192.168.11.66:8017/api/method/erp_mobile.api.policy.get_policy_details?policy=$policyName";
+        "http://192.168.11.66:8014/api/method/erp_mobile.api.policy.get_policy_details?policy=$policyName";
 
     // final response = await http.post(Uri.parse(url),headers:headers);
     final sid = box.read(SID);
-    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+    final response = await http.get(Uri.parse(url),headers: headers);
 
     int statusCode = response.statusCode;
 
@@ -442,7 +424,7 @@ Future<Map<String, dynamic>?> apiHolidayList() async {
     String url = "http://192.168.11.66:8017/api/method/erp_mobile.api.holiday.get_holidays?employee_code=$EmployeeCode";
 
     final sid = box.read(SID);
-    final response = await http.get(Uri.parse(url),headers: {'Cookie': 'sid=$sid'});
+    final response = await http.get(Uri.parse(url),headers: headers);
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mantra_ess/Global/webService.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:mantra_ess/Global/constant.dart';
 
 // ---------------------
 // Edit these to match your server (GetPoNamingSeries etc. should be provided in webService)
@@ -318,7 +319,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetPoNamingSeries");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"]?['naming_series'] ?? j["data"];
@@ -338,7 +339,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetPoPurchaseType");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -356,7 +357,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Supplier&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"] ?? j;
@@ -376,7 +377,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Company&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"] ?? j;
@@ -398,7 +399,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Purchase Person&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -416,7 +417,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetPoApprover");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -434,7 +435,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Currency&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -454,7 +455,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Warehouse&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -476,7 +477,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetMasterList?doctype=Project&search_text=${Uri.encodeQueryComponent(search)}");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"];
@@ -497,7 +498,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     try {
       final sid = box.read("SID");
       final url = Uri.parse("$GetPartyName?party_type=Supplier&party=$_selectedSupplier");
-      final resp = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+      final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         setState(() => _supplierName = j['data']?.toString() ?? supplierId);
@@ -728,7 +729,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       try {
         final sid = box.read("SID");
         final url = Uri.parse("$GetMasterList?doctype=Item&search_text=${Uri.encodeQueryComponent(search)}");
-        final res = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+        final res = await http.get(url, headers: headers);
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body);
           itemCodes = (data["data"] as List).map((e) => e.toString()).toList();
@@ -743,7 +744,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       try {
         final sid = box.read("SID");
         final url = Uri.parse("$GetMasterList?doctype=UOM&search_text=${Uri.encodeQueryComponent(search)}");
-        final res = await http.get(url, headers: {'Cookie': 'sid=$sid'});
+        final res = await http.get(url, headers: headers);
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body);
           uoms = (data["data"] as List).map((e) => e.toString()).toList();
@@ -1125,11 +1126,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       final url = Uri.parse("$CreatePurchaseOrder"); // replace with actual PO creation endpoint
       final resp = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cookie': 'sid=$sid',
-        },
+        headers: headers,
         body: json.encode(payload),
       );
 

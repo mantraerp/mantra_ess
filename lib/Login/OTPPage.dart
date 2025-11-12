@@ -8,6 +8,7 @@ import 'package:mantra_ess/Global/appWidget.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Global/webService.dart';
 import 'loginPage.dart';
+import 'package:mantra_ess/dashboard.dart';
 
 class OTPPage extends StatefulWidget {
 
@@ -110,72 +111,97 @@ class _OTPPageState extends State<OTPPage> {
     );
   }
 
-  void actResendCode(){
-
-    String otpString = 'OTP will be sent on ${prefsGlobal.getString(NUDMantraEmail)}.';
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: mantraLabel('Re-Send code', 18,appGray, TextAlign.left, FontWeight.w500, 1),
-          content: mantraLabel(otpString, 18,appGray, TextAlign.left, FontWeight.w400, 3),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: <Widget>[
-            TextButton(
-              child: mantraLabel('Re-Send', 12,appGray, TextAlign.center, FontWeight.w500, 1),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  serviceCall = true;
-                  actSendOTP();
-                });
-                //
-              },
-            ),
-            TextButton(
-              child: mantraLabel('Change user', 12,appGray, TextAlign.center, FontWeight.w500, 1),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: mantraLabel('Cancel', 12,appGray, TextAlign.center, FontWeight.w500, 1),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      },
+  void actResendCode() {
+    Navigator.of(context).pop();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
     );
+
+
+    // String otpString = 'OTP will be sent on ${prefsGlobal.getString(NUDMantraEmail)}.';
+    //
+    // showDialog(
+    //   context: context,
+    //   builder: (BuildContext context) {
+    //     return AlertDialog(
+    //       title: mantraLabel('Re-Send code', 18, appGray, TextAlign.left, FontWeight.w500, 1),
+    //       content: mantraLabel(otpString, 18, appGray, TextAlign.left, FontWeight.w400, 3),
+    //       actionsAlignment: MainAxisAlignment.center,
+    //       actions: <Widget>[
+    //         TextButton(
+    //           child: mantraLabel('Re-Send', 12, appGray, TextAlign.center, FontWeight.w500, 1),
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //             setState(() {
+    //               serviceCall = true;
+    //             });
+    //             actSendOTP(); // ✅ Call resend API instead of going to login
+    //           },
+    //         ),
+    //         TextButton(
+    //           child: mantraLabel('Change user', 12, appGray, TextAlign.center, FontWeight.w500, 1),
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //             Navigator.pushReplacement(
+    //               context,
+    //               MaterialPageRoute(builder: (context) => LoginPage()),
+    //             );
+    //           },
+    //         ),
+    //         TextButton(
+    //           child: mantraLabel('Cancel', 12, appGray, TextAlign.center, FontWeight.w500, 1),
+    //           onPressed: () {
+    //             Navigator.of(context).pop();
+    //           },
+    //         )
+    //       ],
+    //     );
+    //   },
+    // );
   }
+
   void actOTPVerification() async {
+    if (serviceCall) return;
 
-    if(serviceCall){return;}
-    setState(() {serviceCall = true;});
+    setState(() {
+      serviceCall = true;
+    });
 
-    apiOTPVerification(_txtCode.text).then((response)
-    {
+    apiOTPVerification(_txtCode.text).then((response) {
       serviceCall = false;
       setState(() {});
-      if (response.runtimeType!=bool)
-      {
-          String cookie = "";
-          for (var key in response.keys)
-          {
-            if(!['message','full_name','home_page'].contains(key))
-            {
-              if (cookie.isNotEmpty) {
-                cookie += ";";
-              }
-              cookie += "$key=${response[key]!}";
-            }
+
+      if (response.runtimeType != bool) {
+        // ✅ OTP Verified Successfully
+        String cookie = "";
+        for (var key in response.keys) {
+          if (!['message', 'full_name', 'home_page'].contains(key)) {
+            if (cookie.isNotEmpty) cookie += ";";
+            cookie += "$key=${response[key]!}";
           }
-          headers['Cookie']=cookie;
+        }
+        headers['Cookie'] = cookie;
+
+        // Optional: show a success message
+        showAlert(ApplicationTitle, "OTP verified successfully!");
+
+        // ✅ Navigate to Dashboard
+
+        // OR if you’re using a widget:
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => dashboard()));
+
+      } else {
+        // ❌ Invalid OTP case
+        showAlert(ApplicationTitle, "Invalid OTP. Please try again.");
       }
+    }).catchError((error) {
+      serviceCall = false;
+      setState(() {});
+      showAlert(ApplicationTitle, "Something went wrong. Please try again.");
     });
   }
+
   void actSendOTP() async {
 
     if(serviceCall){
@@ -190,6 +216,7 @@ class _OTPPageState extends State<OTPPage> {
       {
         var allKeys = response.keys;
 
+
         if(allKeys.contains('tmp_id'))
         {
           prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
@@ -200,7 +227,7 @@ class _OTPPageState extends State<OTPPage> {
           String cookie = "";
           for (var key in response.keys)
           {
-            if(!['message','full_name','home_page'].contains(key))
+            if(!['message','full_name','home_page','sid'].contains(key))
             {
               if (cookie.isNotEmpty) {
                 cookie += ";";
