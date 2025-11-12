@@ -12,14 +12,13 @@ class ProfileController extends GetxController {
   void saveEmployeeCode() async {
     final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
     final res = await apiGetEmployeeData(phoneNumber);
-    print(res);
 
     if (res is UserProfileResponse) {
       profileData = res.data.obs;
       box.write('employee_code', res.data.employeeCode);
       box.write('user_email',res.data.email);
     }
-    print(box);
+
   }
 
   Map<String, String> getImageHeaders() {

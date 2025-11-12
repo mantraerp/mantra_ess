@@ -13,6 +13,7 @@ import 'package:mantra_ess/Models/attendance_model.dart';
 import 'package:mantra_ess/Models/profile_model.dart';
 import 'package:mantra_ess/Models/purchase_order_model.dart';
 import 'package:mantra_ess/Models/sales_order_model.dart';
+import 'package:mantra_ess/Screens/profile_screen.dart';
 
 import 'appWidget.dart';
 import 'dart:io';
@@ -166,20 +167,27 @@ Future<dynamic> apiOTPVerification(String OTP) async {
     Uri.parse(
       "$URLOTPVerification?user=$phoneNumber&pwd=$pwd&otp=$OTP&tmp_id=$tmp_id",
     ),
-    headers:{"Content-Type": "application/json",},
+    headers:headers,
   );
   int statusCode = response.statusCode;
 
+
   if (statusCode == 200) {
-    return jsonDecode(response.body);
+    final res = jsonDecode(response.body);
+    if (res.keys.contains('allowed_screens')) {
+      box.write(ALLOWED_SCREEN, res['allowed_screens']);
+
+    }
+    return res;
   } else {
     return _handleFailResponse(response);
   }
 }
 
 Future<dynamic> apiGetDashboardMenu() async {
-  final sid = box.read(SID);
+
   final response = await http.post(Uri.parse(URLGetMenu), headers:headers);
+  print(response);
   int statusCode = response.statusCode;
 
   if (statusCode == 200) {
@@ -193,15 +201,16 @@ Future<dynamic> apiGetEmployeeData(String userEmail) async {
 
   final String url = "$URLGetProfile?user=$userEmail";
 
+
   final response = await http.get(Uri.parse(url),  headers:headers);
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     if (data['status_code'] == 200) {
-      // Save entire response data in global map
-      globle_user_detail = data['data'];
 
-      return globle_user_detail;
+      final UserProfileResponse res = userProfileResponseFromJson(response.body);
+      return res;
+
     } else {
       return _handleFailResponse(response);
     }

@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mantra_ess/Global/apiCall.dart';
@@ -11,102 +9,131 @@ import 'loginPage.dart';
 import 'package:mantra_ess/dashboard.dart';
 
 class OTPPage extends StatefulWidget {
-
   @override
   _OTPPageState createState() => _OTPPageState();
 }
-class _OTPPageState extends State<OTPPage> {
 
+class _OTPPageState extends State<OTPPage> {
   final TextEditingController _txtCode = TextEditingController();
   bool serviceCall = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-  @override
   Widget build(BuildContext context) {
-    return Scaffold (
+    return Scaffold(
       backgroundColor: appWhite,
-      body: screenDesign(context),
+      body: serviceCall
+          ? const Center(
+        child: CircularProgressIndicator(color: appGray),
+      )
+          : SafeArea(child: _buildBody(context)),
     );
   }
 
-  Widget screenDesign(BuildContext context){
-
-    if(serviceCall){
-      return Center(
-          child:Image.asset(
-            IMGLoader,
-            height: 100.0,
-            width: 100.0,
-          )
-      );
-    }
-
+  Widget _buildBody(BuildContext context) {
     return Center(
-      child:
-      ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        children: <Widget> [
-          const SizedBox(height: 80.0),
-          Image.asset('assets/MantraLogo.png',width: deviceWidth,height: 120.0),
-          const SizedBox(height: 30.0),
-          mantraLabel('Enter your verification code', 18,appGray, TextAlign.left, FontWeight.w500, 1),
-          const SizedBox(height: 50.0),
-          TextFormField(
-            controller: _txtCode,
-            textAlign: TextAlign.center,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              suffixIcon: IconButton(
-                  icon: const Icon(Icons.cancel),
-                  onPressed: () {
-                    _txtCode.clear();
-                  }),
-              labelText: "Varification code",
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5.0),
-                borderSide: const BorderSide(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo
+            Image.asset(
+              'assets/MantraLogo.png',
+              width: 150,
+              height: 150,
+            ),
+            const SizedBox(height: 30),
+
+            // Title
+            Text(
+              'Enter your verification code',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appGray,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // OTP TextField
+            TextField(
+              controller: _txtCode,
+              textAlign: TextAlign.center,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: InputDecoration(
+                hintText: "Enter 6-digit code",
+                counterText: "",
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.cancel, color: Colors.grey),
+                  onPressed: _txtCode.clear,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.grey),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide:
+                  const BorderSide(color: Colors.blueAccent, width: 1.5),
                 ),
               ),
             ),
-            validator: (val) {
-              if(val!.isEmpty) {
-                return "Varification code cannot be empty";
-              }else{
-                return null;
-              }
-            },
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 50.0),
-          MaterialButton(
-            height: 40.0,
-            minWidth: 135.0,
-            color: Colors.white,
-            textColor: appGray,
-            shape: RoundedRectangleBorder(side: const BorderSide(
-                color: appGray,
-                width: 0.5,
-                style: BorderStyle.solid),
-                borderRadius: BorderRadius.circular(5)),
-            onPressed: () {
+            const SizedBox(height: 30),
 
-              if(_txtCode.text.isEmpty)
-              {
-                showAlert(ApplicationTitle, 'Please enter code');
-              }
-              else
-              {
-                actOTPVerification();
-              }
-            },
-            child: mantraLabel('Verify', 18,appGray, TextAlign.left, FontWeight.w500, 1),
-          ),
-          appButtonGray("Re-Send code",actResendCode,Alignment.center,100,40),
-        ],
+            // Verify Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_txtCode.text.isEmpty) {
+                    showAlert(ApplicationTitle, 'Please enter code');
+                  } else {
+                    actOTPVerification();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                ),
+                child: const Text(
+                  "Verify",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Resend Code Button
+            TextButton.icon(
+              onPressed: actResendCode,
+              icon: const Icon(Icons.refresh, color: Colors.blueAccent),
+              label: const Text(
+                "Re-Send Code",
+                style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Change user option
+
+          ],
+        ),
       ),
     );
   }
@@ -117,56 +144,11 @@ class _OTPPageState extends State<OTPPage> {
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
-
-
-    // String otpString = 'OTP will be sent on ${prefsGlobal.getString(NUDMantraEmail)}.';
-    //
-    // showDialog(
-    //   context: context,
-    //   builder: (BuildContext context) {
-    //     return AlertDialog(
-    //       title: mantraLabel('Re-Send code', 18, appGray, TextAlign.left, FontWeight.w500, 1),
-    //       content: mantraLabel(otpString, 18, appGray, TextAlign.left, FontWeight.w400, 3),
-    //       actionsAlignment: MainAxisAlignment.center,
-    //       actions: <Widget>[
-    //         TextButton(
-    //           child: mantraLabel('Re-Send', 12, appGray, TextAlign.center, FontWeight.w500, 1),
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //             setState(() {
-    //               serviceCall = true;
-    //             });
-    //             actSendOTP(); // ✅ Call resend API instead of going to login
-    //           },
-    //         ),
-    //         TextButton(
-    //           child: mantraLabel('Change user', 12, appGray, TextAlign.center, FontWeight.w500, 1),
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //             Navigator.pushReplacement(
-    //               context,
-    //               MaterialPageRoute(builder: (context) => LoginPage()),
-    //             );
-    //           },
-    //         ),
-    //         TextButton(
-    //           child: mantraLabel('Cancel', 12, appGray, TextAlign.center, FontWeight.w500, 1),
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //           },
-    //         )
-    //       ],
-    //     );
-    //   },
-    // );
   }
 
   void actOTPVerification() async {
     if (serviceCall) return;
-
-    setState(() {
-      serviceCall = true;
-    });
+    setState(() => serviceCall = true);
 
     apiOTPVerification(_txtCode.text).then((response) {
       serviceCall = false;
@@ -182,18 +164,11 @@ class _OTPPageState extends State<OTPPage> {
           }
         }
         headers['Cookie'] = cookie;
-
-        // Optional: show a success message
         showAlert(ApplicationTitle, "OTP verified successfully!");
-
-        // ✅ Navigate to Dashboard
-
-        // OR if you’re using a widget:
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => dashboard()));
-
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => dashboard()));
       } else {
-        // ❌ Invalid OTP case
-        showAlert(ApplicationTitle, "Invalid OTP. Please try again.");
+
       }
     }).catchError((error) {
       serviceCall = false;
@@ -203,42 +178,36 @@ class _OTPPageState extends State<OTPPage> {
   }
 
   void actSendOTP() async {
-
-    if(serviceCall){
-      return;
-    }
-    setState(() {serviceCall = true;});
-    apiLogin().then((response)
-    {
-      serviceCall = false;
-      setState(() {});
-      if (response.runtimeType!=bool)
-      {
-        var allKeys = response.keys;
-
-
-        if(allKeys.contains('tmp_id'))
-        {
-          prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
-          showAlert(ApplicationTitle, 'Resend OTP.');
-        }
-        else
-        {
-          String cookie = "";
-          for (var key in response.keys)
-          {
-            if(!['message','full_name','home_page','sid'].contains(key))
-            {
-              if (cookie.isNotEmpty) {
-                cookie += ";";
-              }
-              cookie += "$key=${response[key]!}";
-            }
-          }
-          headers['Cookie']=cookie;
-        }
-      }
-    });
+  //   if (serviceCall) return;
+  //   setState(() => serviceCall = true);
+  //
+  //   apiLogin().then((response) {
+  //     serviceCall = false;
+  //     setState(() {});
+  //     if (response is String) {
+  //       try {
+  //         response = jsonDecode(response);
+  //       } catch (e) {
+  //         showAlert(ApplicationTitle, "Invalid server response.");
+  //         return;
+  //       }
+  //     }
+  //
+  //     if (response.runtimeType != bool) {
+  //       if (response.keys.contains('tmp_id')) {
+  //         prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
+  //         showAlert(ApplicationTitle, 'Resend OTP.');
+  //       } else {
+  //         String cookie = "";
+  //         for (var key in response.keys) {
+  //           if (!['message', 'full_name', 'home_page', 'sid'].contains(key)) {
+  //             if (cookie.isNotEmpty) cookie += ";";
+  //             cookie += "$key=${response[key]!}";
+  //           }
+  //         }
+  //         headers['Cookie'] = cookie;
+  //       }
+  //     }
+  //   });
   }
 }
-

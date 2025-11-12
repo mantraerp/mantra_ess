@@ -19,7 +19,7 @@ class PaymentAPI {
       throw Exception("Bank account or payroll entry required");
     }
 
-    final response = await http.get(url);
+    final response = await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -40,7 +40,7 @@ class PaymentAPI {
       throw Exception("Bank account or payroll entry required");
     }
 
-    final response = await http.get(url);
+    final response =await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -58,7 +58,7 @@ class PaymentAPI {
       String paymentEntryId) async {
     final url = Uri.parse(
         "$PaymentPageRefrenceDetails?payment_entry=$paymentEntryId");
-    final response = await http.get(url);
+    final response = await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -100,7 +100,7 @@ class PaymentAPI {
   // ---------------------------
   static Future<void> holdPayment(String paymentEntryId) async {
     final url = Uri.parse("$SUB_BASE_URL/cancel_payment_entries");
-    final response = await http.post(url, body: {
+    final response = await http.post(url, headers:headers,body: {
       "payment_entry_ids": jsonEncode([paymentEntryId]),
     });
 
@@ -115,7 +115,7 @@ class PaymentAPI {
   static Future<List<Map<String, dynamic>>> getBanks() async {
     final url = Uri.parse(
         "$PaymentPageBankList");
-    final response = await http.get(url);
+    final response = await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -134,7 +134,7 @@ class PaymentAPI {
   static Future<List<Map<String, dynamic>>> getBankAccounts(
       String bankName) async {
     final url = Uri.parse("$PaymentPageBankAccountList?bank=$bankName");
-    final response = await http.get(url);
+    final response = await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -251,7 +251,7 @@ class PaymentAPI {
       String month) async {
     final url = Uri.parse(
         "$PaymentPagePayrollEntriesList?month=$month");
-    final response = await http.get(url);
+    final response = await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -266,7 +266,7 @@ class PaymentAPI {
       String payroll) async {
     final url = Uri.parse(
         "$PaymentPageSalarySlipsList?payroll_entry=$payroll");
-    final response = await http.get(url);
+    final response =await http.get(url,headers: headers);
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
