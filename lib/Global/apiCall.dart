@@ -309,7 +309,7 @@ Future<dynamic> apiGetSalesOrders(String fromDate, String toDate, int start) asy
 //Get SerialNumber Api
 Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
   String url =
-      "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.track_serial_number?serial_no=$serialNumber";
+      "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.track_serial_number?serial_no=$serialNumber";
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final sid = box.read(SID);
@@ -328,7 +328,7 @@ Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
 //Get Batch Number
 Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
   String url =
-      "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.track_batch_details?batch_no=$batchNumber";
+      "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.track_batch_details?batch_no=$batchNumber";
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final sid = box.read(SID);
@@ -348,7 +348,7 @@ Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
 Future<String?> apiCheckSerialOrBatchType(String number) async {
   try {
     String url =
-        "http://192.168.11.66:8017/api/method/erp_mobile.api.serial_no.check_serial_or_batch?number=$number";
+        "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.check_serial_or_batch?number=$number";
 
     final sid = box.read(SID);
     final response = await http.get(Uri.parse(url),headers: headers);
@@ -421,7 +421,7 @@ Future<Map<String, dynamic>> apifetchPolicyDetails(String policyName) async {
 Future<Map<String, dynamic>?> apiHolidayList() async {
   final String EmployeeCode = box.read('employee_code');
   try {
-    String url = "http://192.168.11.66:8017/api/method/erp_mobile.api.holiday.get_holidays?employee_code=$EmployeeCode";
+    String url = "http://192.168.11.66:8014/api/method/erp_mobile.api.holiday.get_holidays?employee_code=$EmployeeCode";
 
     final sid = box.read(SID);
     final response = await http.get(Uri.parse(url),headers: headers);
