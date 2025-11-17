@@ -12,8 +12,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:mantra_ess/Global/constant.dart';
 
+import 'package:mantra_ess/Screens/toast_helper.dart';
 class ExpenseClaimScreen extends StatefulWidget {
   const ExpenseClaimScreen({super.key});
 
@@ -60,6 +60,8 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
     }
   }
 
+
+
   /// Fetch Expense Claims (monthly)
   Future<void> fetchExpenseClaims(DateTime monthDate) async {
     setState(() {
@@ -78,34 +80,36 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
         0,
       );
 
-      if (res != null && res['data'] != null) {
+      if (res?['data'] != null) {
         final seen = <String>{};
         final List<dynamic> temp = [];
 
         for (var exp in res['data']) {
-          if (exp['expenses'] != null) {
-            for (var e in exp['expenses']) {
-              // Build a unique key string for each expense
-              final key =
-                  "${e['name']}";
+          final expenses = exp?['expenses'];
+          if (expenses == null) continue;
 
-              if (!seen.contains(key)) {
-                seen.add(key);
-                temp.add(e);
-              }
+          for (var e in expenses) {
+            if (e == null) continue;
+
+            final name = e['name'] ?? '';
+            if (name.isEmpty) continue;
+
+            if (!seen.contains(name)) {
+              seen.add(name);
+              temp.add(e);
             }
           }
         }
 
         setState(() {
-          allExpenses.clear();
-          allExpenses.addAll(temp);
+          allExpenses
+            ..clear()
+            ..addAll(temp);
+
           _filterExpensesForSelectedDay();
           isLoading = false;
         });
-      }
-
-      else {
+      } else {
         setState(() {
           allExpenses = [];
           filteredExpenses = [];
@@ -122,6 +126,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
       });
     }
   }
+
 
   /// Filter expenses for selected day
   void _filterExpensesForSelectedDay() {
@@ -206,29 +211,16 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
       final data = jsonDecode(res.body);
 
       if (res.statusCode == 200 || res.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              data["message"] ?? "Expense deleted successfully",
-              textAlign: TextAlign.center,
-            ),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        );
+        ToastUtils.show(context, data["message"] ?? "Expense deleted successfully");
+
         fetchExpenseClaims(_focusedDay);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed: ${data['message'] ?? 'Error deleting expense'}")),
-        );
+        ToastUtils.show(context,"Failed: ${data['message'] ?? 'Error deleting expense'}");
+
       }
     } catch (e) {
-      print(e);
-      ScaffoldMessenger.of(context).showSnackBar(
+      ToastUtils.show(context,"Failed: Error deleting expense: $e");
 
-        SnackBar(content: Text("Error deleting expense: $e")),
-      );
     }
   }
 
@@ -241,167 +233,9 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
     _filterExpensesForSelectedDay();
   }
 
-  /// --------------------------
-  /// 🟣 ADD EXPENSE DIALOG
-  /// --------------------------
-  // void _showAddExpenseDialog() {
-  //   final TextEditingController descriptionController = TextEditingController();
-  //   final TextEditingController amountController = TextEditingController();
-  //   String? selectedType;
-  //
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (context) => Dialog(
-  //       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-  //       child: StatefulBuilder(
-  //         builder: (context, setState) => Padding(
-  //           padding: const EdgeInsets.all(20),
-  //           child: SingleChildScrollView(
-  //             child: Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 // Header
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [
-  //                     const Text(
-  //                       "Add Expense Claim",
-  //                       style: TextStyle(
-  //                         fontWeight: FontWeight.w700,
-  //                         color: Colors.indigo,
-  //                         fontSize: 18,
-  //                       ),
-  //                     ),
-  //                     IconButton(
-  //                       icon: const Icon(Icons.close_rounded, color: Colors.grey),
-  //                       onPressed: () => Navigator.pop(context),
-  //                     ),
-  //                   ],
-  //                 ),
-  //                 const Divider(height: 10, thickness: 1),
-  //
-  //                 const SizedBox(height: 15),
-  //
-  //                 // Expense Type
-  //                 ApiDropdown(
-  //                   label: "Expense Type",
-  //                   apiUrl:
-  //                   "$GetMasterList?doctype=Expense Claim Type&search_text=",
-  //                   prefixIcon: Icons.category_outlined,
-  //                   onChanged: (val) => selectedType = val,
-  //                   validator: (value) =>
-  //                   value == null ? "Select an expense type" : null,
-  //                 ),
-  //                 const SizedBox(height: 18),
-  //
-  //                 // Description
-  //                 TextFormField(
-  //                   controller: descriptionController,
-  //                   decoration: InputDecoration(
-  //                     labelText: "Description",
-  //                     hintText: "Enter description of expense",
-  //                     prefixIcon: const Icon(Icons.notes_outlined),
-  //                     filled: true,
-  //                     fillColor: Colors.grey.shade50,
-  //                     border: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                     ),
-  //                     enabledBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                       borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-  //                     ),
-  //                     focusedBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                       borderSide: const BorderSide(color: Colors.grey, width: 1.2),
-  //                     ),
-  //                   ),
-  //                   maxLines: 3,
-  //                 ),
-  //                 const SizedBox(height: 18),
-  //
-  //                 // Amount
-  //                 TextFormField(
-  //                   controller: amountController,
-  //                   keyboardType: TextInputType.number,
-  //                   decoration: InputDecoration(
-  //                     labelText: "Amount",
-  //                     hintText: "Enter amount (₹)",
-  //                     prefixIcon: const Icon(Icons.currency_rupee),
-  //                     filled: true,
-  //                     fillColor: Colors.grey.shade50,
-  //                     border: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                     ),
-  //                     enabledBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                       borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-  //                     ),
-  //                     focusedBorder: OutlineInputBorder(
-  //                       borderRadius: BorderRadius.circular(12),
-  //                       borderSide: const BorderSide(color: Colors.grey, width: 1.1),
-  //                     ),
-  //                   ),
-  //                 ),
-  //
-  //                 const SizedBox(height: 25),
-  //
-  //                 // Buttons
-  //                 Row(
-  //                   mainAxisAlignment: MainAxisAlignment.end,
-  //                   children: [
-  //                     TextButton(
-  //                       onPressed: () => Navigator.pop(context),
-  //                       style: TextButton.styleFrom(
-  //                         foregroundColor: Colors.grey.shade600,
-  //                       ),
-  //                       child: const Text("Cancel"),
-  //                     ),
-  //                     const SizedBox(width: 10),
-  //                     ElevatedButton.icon(
-  //                       onPressed: () async {
-  //                         if (selectedType == null ||
-  //                             descriptionController.text.isEmpty ||
-  //                             amountController.text.isEmpty) {
-  //                           ScaffoldMessenger.of(context).showSnackBar(
-  //                             const SnackBar(
-  //                                 content:
-  //                                 Text("Please fill all required fields.")),
-  //                           );
-  //                           return;
-  //                         }
-  //
-  //                         Navigator.pop(context);
-  //
-  //                         await _handleExpenseSave(
-  //                           selectedType!,
-  //                           descriptionController.text,
-  //                           double.tryParse(amountController.text) ?? 0.0,
-  //                         );
-  //                       },
-  //                       icon: const Icon(Icons.save_rounded, size: 20),
-  //                       label: const Text("Save"),
-  //                       style: ElevatedButton.styleFrom(
-  //                         backgroundColor: Colors.indigo,
-  //                         foregroundColor: Colors.white,
-  //                         shape: RoundedRectangleBorder(
-  //                           borderRadius: BorderRadius.circular(10),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+
   void _showAddExpenseDialog() {
+    final _formKey = GlobalKey<FormState>();
     final TextEditingController descriptionController = TextEditingController();
     final TextEditingController amountController = TextEditingController();
     String? selectedType;
@@ -419,271 +253,296 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
           builder: (context, setState) => Padding(
             padding: const EdgeInsets.all(20),
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Add Expense Claim",
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Add Expense Claim",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.indigo,
+                            fontSize: 18,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.grey),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 10, thickness: 1),
+                    const SizedBox(height: 15),
+
+                    // Expense Type (Required)
+                    RichText(
+                      text: const TextSpan(
+                        text: 'Expense Type ',
                         style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.indigo,
-                          fontSize: 18,
+                            color: Colors.black87, fontWeight: FontWeight.w600),
+                        children: [
+                          TextSpan(
+                            text: '*',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    ApiDropdown(
+                      label: "Expense Type",
+                      apiUrl: "$GetMasterList?doctype=Expense Claim Type&search_text=",
+                      prefixIcon: Icons.category_outlined,
+                      onChanged: (val) => selectedType = val,
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Description (Required)
+                    RichText(
+                      text: const TextSpan(
+                        text: 'Description ',
+                        style: TextStyle(
+                            color: Colors.black87, fontWeight: FontWeight.w600),
+                        children: [
+                          TextSpan(
+                            text: '*',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: descriptionController,
+                      decoration: InputDecoration(
+                        hintText: "Enter description of expense",
+                        prefixIcon: const Icon(Icons.notes_outlined),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Colors.grey),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 10, thickness: 1),
-                  const SizedBox(height: 15),
+                      maxLines: 3,
+                      validator: (value) =>
+                      value == null || value.isEmpty ? "Please enter a description" : null,
+                    ),
+                    const SizedBox(height: 18),
 
-                  // Expense Type
-                  ApiDropdown(
-                    label: "Expense Type",
-                    apiUrl: "$GetMasterList?doctype=Expense Claim Type&search_text=",
-                    prefixIcon: Icons.category_outlined,
-                    onChanged: (val) => selectedType = val,
-                    validator: (value) => value == null ? "Select an expense type" : null,
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Description
-                  TextFormField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      labelText: "Description",
-                      hintText: "Enter description of expense",
-                      prefixIcon: const Icon(Icons.notes_outlined),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    // Amount (Required)
+                    RichText(
+                      text: const TextSpan(
+                        text: 'Amount ',
+                        style: TextStyle(
+                            color: Colors.black87, fontWeight: FontWeight.w600),
+                        children: [
+                          TextSpan(
+                            text: '*',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
                       ),
                     ),
-                    maxLines: 3,
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Amount
-                  TextFormField(
-                    controller: amountController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: "Amount",
-                      hintText: "Enter amount (₹)",
-                      prefixIcon: const Icon(Icons.currency_rupee),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 6),
+                    TextFormField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: "Enter amount (₹)",
+                        prefixIcon: const Icon(Icons.currency_rupee),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return "Please enter amount";
+                        if (double.tryParse(value) == null) return "Enter a valid number";
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 18),
+                    const SizedBox(height: 18),
 
-                  // File Upload Button
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: (isUploading || uploadedFileUrl != null)
-                              ? null
-                              : () async {
-                            final result = await FilePicker.platform.pickFiles();
-                            if (result == null || result.files.isEmpty) return;
+                    // File Upload Section
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: (isUploading || uploadedFileUrl != null)
+                                ? null
+                                : () async {
+                              final result = await FilePicker.platform.pickFiles();
+                              if (result == null || result.files.isEmpty) return;
 
-                            final file = result.files.first;
-                            final sid = box.read("sid");
+                              final file = result.files.first;
+                              setState(() => isUploading = true);
 
-                            setState(() => isUploading = true);
-
-                            try {
-                              var formData = FormData.fromMap({
-                                "doctype": "Expense Claim Detail",
-                                "docname": expenseClaimName ?? '1',
-                                "fieldname": "custom_attachment",
-                                "private": 1,
-                                "files": await MultipartFile.fromFile(
-                                  file.path!,
-                                  filename: file.name,
-                                ),
-                              });
-
-                              var dio = Dio();
-
-                              var response = await dio.post(
-                                "$uploadAttachment",
-                                data: formData,
-                                options: Options(headers: headers),
-                              );
-
-                              if (response.statusCode == 201) {
-                                var fileUrl = response.data["data"]?["file_url"] ??
-                                    response.data["file_url"];
-                                setState(() {
-                                  uploadedFileUrl = fileUrl;
+                              try {
+                                var formData = FormData.fromMap({
+                                  "doctype": "Expense Claim Detail",
+                                  "docname": expenseClaimName ?? '1',
+                                  "fieldname": "custom_attachment",
+                                  "private": 1,
+                                  "files": await MultipartFile.fromFile(
+                                    file.path!,
+                                    filename: file.name,
+                                  ),
                                 });
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                      Text("File uploaded successfully ✅")),
+                                var dio = Dio();
+                                var response = await dio.post(
+                                  "$uploadAttachment",
+                                  data: formData,
+                                  options: Options(headers: headers),
                                 );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          "Upload failed: ${response.statusMessage}")),
-                                );
+
+                                if (response.statusCode == 201) {
+                                  var fileUrl = response.data["data"]?["file_url"] ??
+                                      response.data["file_url"];
+                                  setState(() {
+                                    uploadedFileUrl = fileUrl;
+                                  });
+                                  ToastUtils.show(context,"File uploaded successfully ✅");
+
+                                } else {
+
+                                      ToastUtils.show(context, "Upload failed: ${response.statusMessage}");
+
+                                }
+                              } catch (e) {
+                                ToastUtils.show(context,"Error uploading file: $e");
+
+                              } finally {
+                                setState(() => isUploading = false);
                               }
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content:
-                                    Text("Error uploading file: $e")),
-                              );
-                            } finally {
-                              setState(() => isUploading = false);
-                            }
-                          },
-                          icon: isUploading
-                              ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                            },
+                            icon: isUploading
+                                ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : const Icon(Icons.attach_file),
+                            label: Text(
+                              uploadedFileUrl == null
+                                  ? "Upload Attachment"
+                                  : "Attachment Uploaded ✅",
                             ),
-                          )
-                              : const Icon(Icons.attach_file),
-                          label: Text(
-                            uploadedFileUrl == null
-                                ? "Upload Attachment"
-                                : "Attachment Uploaded ✅",
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: uploadedFileUrl == null
-                                ? Colors.blueAccent.shade400
-                                : Colors.green.shade600,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 48),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: uploadedFileUrl == null
+                                  ? Colors.blueAccent.shade400
+                                  : Colors.green.shade600,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 48),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      if (uploadedFileUrl != null) ...[
-                        const SizedBox(width: 8),
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundColor: Colors.red.shade600,
-                          child: isDeleting
-                              ? const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                              : IconButton(
-                            icon: const Icon(Icons.close,
-                                color: Colors.white, size: 18),
-                            onPressed: () async {
-                              final sid = box.read("sid");
-                              setState(() => isDeleting = true);
-                              try {
-                                var response = await Dio().post(
-                                  "$DeleteAttachment",
-                                  data: {
-                                    "file_url": uploadedFileUrl,
-                                    "doctype": "Expense Claim Detail",
-                                    "docname": expenseClaimName ?? '1',
-                                  },
-                                  options: Options(
-                                      headers: headers),
-                                );
-
-                                if (response.statusCode == 202) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content:
-                                        Text("File deleted successfully ❌")),
+                        if (uploadedFileUrl != null) ...[
+                          const SizedBox(width: 8),
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Colors.red.shade600,
+                            child: isDeleting
+                                ? const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : IconButton(
+                              icon: const Icon(Icons.close,
+                                  color: Colors.white, size: 18),
+                              onPressed: () async {
+                                setState(() => isDeleting = true);
+                                try {
+                                  var response = await Dio().post(
+                                    "$DeleteAttachment",
+                                    data: {
+                                      "file_url": uploadedFileUrl,
+                                      "doctype": "Expense Claim Detail",
+                                      "docname": expenseClaimName ?? '1',
+                                    },
+                                    options: Options(headers: headers),
                                   );
-                                  setState(() {
-                                    uploadedFileUrl = null;
-                                  });
+
+                                  if (response.statusCode == 202) {
+
+                                    ToastUtils.show(context, "File deleted successfully ❌");
+                                    setState(() {
+                                      uploadedFileUrl = null;
+                                    });
+                                  }
+                                } catch (e) {
+                                  ToastUtils.show(context, "Error deleting file: $e");
+
+                                } finally {
+                                  setState(() => isDeleting = false);
                                 }
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content:
-                                      Text("Error deleting file: $e")),
-                                );
-                              } finally {
-                                setState(() => isDeleting = false);
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Save / Cancel Buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade600,
+                          ),
+                          child: const Text("Cancel"),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              if (selectedType == null) {
+                                ToastUtils.show(context, "Please select an expense type.");
+                                return;
                               }
-                            },
+
+                              Navigator.pop(context);
+                              await _handleExpenseSave(
+                                selectedType!,
+                                descriptionController.text,
+                                double.tryParse(amountController.text) ?? 0.0,
+                                uploadedFileUrl,
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.save_rounded, size: 20),
+                          label: const Text("Save"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.indigo,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-
-                  // Save / Cancel Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.grey.shade600,
-                        ),
-                        child: const Text("Cancel"),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          if (selectedType == null ||
-                              descriptionController.text.isEmpty ||
-                              amountController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Please fill all required fields."),
-                              ),
-                            );
-                            return;
-                          }
-
-                          Navigator.pop(context);
-                          await _handleExpenseSave(
-                            selectedType!,
-                            descriptionController.text,
-                            double.tryParse(amountController.text) ?? 0.0,
-                            uploadedFileUrl,
-                          );
-                        },
-                        icon: const Icon(Icons.save_rounded, size: 20),
-                        label: const Text("Save"),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.indigo,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -728,9 +587,8 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error checking expense claim: $e")),
-      );
+      ToastUtils.show(context, "Error checking expense claim: $e");
+
     }
 
   }
@@ -791,29 +649,16 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
 
       final data = jsonDecode(res.body);
       if (res.statusCode == 200 || res.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              "Expense Claim saved successfully",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ToastUtils.show(context,   "Expense Claim saved successfully",);
+
         fetchExpenseClaims(_focusedDay);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed: ${data['message'] ?? 'Error'}")),
-        );
+        ToastUtils.show(context,"Failed: ${data['message'] ?? 'Error'}");
+
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error creating expense claim: $e")),
-      );
+
+      ToastUtils.show(context,"Error creating expense claim: $e");
     }
   }
 
@@ -828,8 +673,7 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
       appBar: AppBar(
         title: const Text('Expense Calendar'),
         centerTitle: true,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
+
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddExpenseDialog,

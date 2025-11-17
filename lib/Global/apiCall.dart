@@ -83,7 +83,7 @@ Future<File?> downloadAndSavePDF(String slipName) async {
     await OpenFilex.open(savePath);
     return File(savePath);
   } catch (e) {
-    showAlert("", "Failed to download PDF\n$e");
+    // showAlert("", "Failed to download PDF\n$e");
     return null;
   }
 }
@@ -111,7 +111,7 @@ dynamic _handleFailResponse(dynamic response) {
 
 Future<dynamic> apiLogin() async {
   final String phoneNumber = prefsGlobal.getString(NUDMantraEmail)!;
-  print(phoneNumber);
+
   final String otp = prefsGlobal.getString(NUDMantraPass)!;
 
   final response = await http.post(
@@ -134,7 +134,7 @@ Future<dynamic> apiLogin() async {
       box.write(SID, res['sid']);
     }
 
-    await apiGetEmployeeData(phoneNumber);
+
     return res;
   } else {
     return _handleFailResponse(response);
@@ -200,9 +200,9 @@ Future<dynamic> apiGetDashboardMenu() async {
 Future<dynamic> apiGetEmployeeData(String userEmail) async {
 
   final String url = "$URLGetProfile?user=$userEmail";
+  print(headers);
 
-
-  final response = await http.get(Uri.parse(url),  headers:headers);
+  final response = await http.get(Uri.parse(url), headers:headers);
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
@@ -248,7 +248,7 @@ String formatDate(DateTime date) {
 }
 
 Future<dynamic> apiSalarySlipList({DateTime? fromDate, DateTime? toDate}) async {
-  final String EmployeeCode = globle_user_detail['employee_code'];
+  final String EmployeeCode = box.read('employee_code');
   final sid = box.read(SID);
   final String fromDateStr = fromDate != null ? formatDate(fromDate) : '';
   final String toDateStr = toDate != null ? formatDate(toDate) : '';

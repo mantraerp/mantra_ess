@@ -103,7 +103,7 @@ class _BaseActivityScreenState extends State<BaseActivityScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepOrange,
+                        color: Colors.black,
                       ),
                     ),
                     if (_activityLogs.isNotEmpty)
@@ -243,7 +243,7 @@ class _BaseActivityScreenState extends State<BaseActivityScreen> {
                                       ? "Show Less"
                                       : "Show More",
                                   style: const TextStyle(
-                                    color: Colors.deepOrange,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -253,7 +253,7 @@ class _BaseActivityScreenState extends State<BaseActivityScreen> {
                                       ? Icons.arrow_upward
                                       : Icons.arrow_downward,
                                   size: 18,
-                                  color: Colors.deepOrange,
+                                  color: Colors.black,
                                 ),
                               ],
                             ),

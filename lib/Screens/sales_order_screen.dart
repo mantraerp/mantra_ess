@@ -122,7 +122,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Cookie': 'sid=$sid', 'Accept': 'application/json'},
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -267,7 +267,7 @@ class _SalesOrderListScreenState extends State<SalesOrderListScreen> {
           ? Center(child: Text(_errorMessage))
           : _salesOrders.isEmpty
           ? const Center(
-          child: Text("No Sales Invoices Found",
+          child: Text("No Sales Orders Found",
               style: TextStyle(color: Colors.grey)))
           : RefreshIndicator(
         onRefresh: () => _fetchSalesOrders(isRefresh: true),

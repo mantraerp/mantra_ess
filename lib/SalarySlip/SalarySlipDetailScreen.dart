@@ -42,11 +42,12 @@ class SalarySlipDetailScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+
       appBar: AppBar(
         title: Text(name),
-        backgroundColor: Colors.blueAccent,
-        elevation: 2,
+        centerTitle: true,
+
+
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -219,7 +220,7 @@ class SalarySlipDetailScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: Colors.blueAccent.shade100,
+              color: Colors.grey.shade100,
               elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(14),

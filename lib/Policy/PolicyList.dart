@@ -47,20 +47,19 @@ class PolicyListState extends State<Policylist> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Policies',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'Policies'
         ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0072ff), Color(0xFF00c6ff)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+        // flexibleSpace: Container(
+        //   decoration: const BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [Color(0xFF0072ff), Color(0xFF00c6ff)],
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //     ),
+        //   ),
+        // ),
         centerTitle: true,
-        elevation: 2,
+
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -68,7 +67,7 @@ class PolicyListState extends State<Policylist> {
           ? Center(
         child: Text(
           errorMessage,
-          style: const TextStyle(color: Colors.red, fontSize: 16),
+          style: const TextStyle(color: Colors.grey, fontSize: 16),
         ),
       )
           : listData.isEmpty

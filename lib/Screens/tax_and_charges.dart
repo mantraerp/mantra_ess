@@ -22,13 +22,12 @@ class TaxAndChargesScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+
       appBar: AppBar(
         title: Text(title),
         centerTitle: true,
         elevation: 1,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+
       ),
       body: taxList.isEmpty
           ? const Center(

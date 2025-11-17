@@ -10,18 +10,18 @@ class AttendanceResponse {
   String message;
   List<AttendanceRecord> data;
   int statusCode;
-  Map<String, int> summary; // ✅ Added field
+  Map<String, int> attendance_count; // ✅ Added field
 
   AttendanceResponse({
     required this.message,
     required this.data,
     required this.statusCode,
-    required this.summary,
+    required this.attendance_count,
   });
 
   factory AttendanceResponse.fromJson(Map<String, dynamic> json) {
     // Some APIs might not return "summary"
-    final summaryData = json["summary"];
+    final summaryData = json["attendance_count"];
     Map<String, int> summaryMap = {};
 
     if (summaryData != null && summaryData is Map<String, dynamic>) {
@@ -36,7 +36,7 @@ class AttendanceResponse {
         (json["data"] ?? []).map((x) => AttendanceRecord.fromJson(x)),
       ),
       statusCode: json["status_code"] ?? 0,
-      summary: summaryMap,
+      attendance_count: summaryMap,
     );
   }
 
@@ -44,7 +44,7 @@ class AttendanceResponse {
     "message": message,
     "data": List<dynamic>.from(data.map((x) => x.toJson())),
     "status_code": statusCode,
-    "summary": summary,
+    "summary": attendance_count,
   };
 }
 

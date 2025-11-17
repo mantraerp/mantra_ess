@@ -73,10 +73,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
     try {
       final sid = box.read('SID');
       final url = Uri.parse("$GetSalesOrderDetail?so_name=${widget.salesOrderName}");
-      final response = await http.get(url, headers: {
-        'Cookie': 'sid=$sid',
-        'Accept': 'application/json',
-      });
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -133,6 +130,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       appBar: AppBar(
         title: Text(widget.salesOrderName),
         elevation: 1,
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -259,11 +257,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.15), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -288,7 +282,7 @@ class _SalesOrderDetailScreenState extends State<SalesOrderDetailScreen> {
               color: color,
             ),
           ),
-          subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black)),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey),
         ),
       ),

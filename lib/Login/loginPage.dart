@@ -5,6 +5,7 @@ import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Global/constant.dart';
 import 'package:mantra_ess/Login/OTPPage.dart';
 import 'package:mantra_ess/dashboard.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ✅ import this
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,14 +19,43 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController txtPassword = TextEditingController();
   bool serviceCall = false;
   bool showPassword = false;
+  bool rememberMe = false; // ✅ new flag
 
   @override
   void initState() {
     super.initState();
-
+    _loadSavedCredentials(); // ✅ load saved email/password if rememberMe was true
   }
 
+  // ✅ Load saved credentials
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email');
+    final savedPassword = prefs.getString('saved_password');
+    final savedRemember = prefs.getBool('remember_me') ?? false;
 
+    if (savedRemember) {
+      setState(() {
+        txtEmail.text = savedEmail ?? '';
+        txtPassword.text = savedPassword ?? '';
+        rememberMe = savedRemember;
+      });
+    }
+  }
+
+  // ✅ Save or clear credentials
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (rememberMe) {
+      await prefs.setString('saved_email', txtEmail.text);
+      await prefs.setString('saved_password', txtPassword.text);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,15 +80,9 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Logo
-          Image.asset(
-            'assets/MantraLogo.png',
-            width: 160,
-            height: 120,
-          ),
+          Image.asset('assets/MantraLogo.png', width: 160, height: 120),
           const SizedBox(height: 40),
 
-          // Title
           Text(
             "Welcome Back",
             style: TextStyle(
@@ -68,13 +92,11 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
-            "Sign in to continue",
-            style: TextStyle(color: Colors.grey, fontSize: 15),
-          ),
+          const Text("Sign in to continue",
+              style: TextStyle(color: Colors.grey, fontSize: 15)),
           const SizedBox(height: 40),
 
-          // Email Field
+          // Email
           TextFormField(
             controller: txtEmail,
             decoration: InputDecoration(
@@ -93,12 +115,6 @@ class _LoginPageState extends State<LoginPage> {
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.black26),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                const BorderSide(color: Color(0xFF3E64FF), width: 1.2),
               ),
             ),
             keyboardType: TextInputType.emailAddress,
@@ -106,18 +122,16 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 20),
 
-          // Password Field
+          // Password
           TextFormField(
             controller: txtPassword,
             obscureText: !showPassword,
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  showPassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                ),
+                icon: Icon(showPassword
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined),
                 onPressed: () {
                   setState(() {
                     showPassword = !showPassword;
@@ -129,18 +143,32 @@ class _LoginPageState extends State<LoginPage> {
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Colors.black26),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                const BorderSide(color: Color(0xFF3E64FF), width: 1.2),
               ),
             ),
           ),
-          const SizedBox(height: 35),
+          const SizedBox(height: 15),
 
-          // Login Button
+          // ✅ Remember Me checkbox
+          Row(
+            children: [
+              Checkbox(
+                value: rememberMe,
+                activeColor: const Color(0xFF3E64FF),
+                onChanged: (bool? value) {
+                  setState(() {
+                    rememberMe = value ?? false;
+                  });
+                },
+              ),
+              const Text(
+                "Remember Me",
+                style: TextStyle(fontSize: 15, color: Colors.black87),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Login button
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -150,8 +178,6 @@ class _LoginPageState extends State<LoginPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                elevation: 4,
-                shadowColor: Colors.blueAccent.withOpacity(0.3),
               ),
               onPressed: serviceCall ? null : () => actLoginCall(context),
               child: serviceCall
@@ -173,20 +199,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-
-          const SizedBox(height: 25),
-
-          // Footer
-          // TextButton(
-          //   onPressed: () {},
-          //   child: const Text(
-          //     "Forgot password?",
-          //     style: TextStyle(
-          //       fontSize: 15,
-          //       color: Color(0xFF3E64FF),
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );
@@ -200,14 +212,15 @@ class _LoginPageState extends State<LoginPage> {
     prefsGlobal.setString(NUDMantraEmail, txtEmail.text);
     prefsGlobal.setString(NUDMantraPass, txtPassword.text);
 
-    apiLogin().then((response) {
+    apiLogin().then((response) async {
       setState(() => serviceCall = false);
 
       if (response.runtimeType == bool) {
         setState(() {});
       } else {
-        var allKeys = response.keys;
+        await _saveCredentials();
 
+        var allKeys = response.keys;
         if (allKeys.contains('tmp_id')) {
           prefsGlobal.setString(NUDMantraTempID, response['tmp_id']);
           Navigator.push(
@@ -222,7 +235,6 @@ class _LoginPageState extends State<LoginPage> {
               cookie += "$key=${response[key]!}";
             }
           }
-
           headers['Cookie'] = cookie;
           Navigator.push(
             context,

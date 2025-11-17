@@ -130,6 +130,7 @@ class _PurchaseReceiptDetailScreenState extends State<PurchaseReceiptDetailScree
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.purchaseReceiptName),
+        centerTitle: true,
         elevation: 1,
       ),
       body: _isLoading
@@ -262,11 +263,7 @@ class _PurchaseReceiptDetailScreenState extends State<PurchaseReceiptDetailScree
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.15), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -294,7 +291,7 @@ class _PurchaseReceiptDetailScreenState extends State<PurchaseReceiptDetailScree
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: Colors.black),
           ),
           trailing: const Icon(Icons.arrow_forward_ios_rounded,
               size: 18, color: Colors.grey),

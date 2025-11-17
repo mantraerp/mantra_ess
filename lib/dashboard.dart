@@ -89,7 +89,7 @@ class _dashboardState extends State<dashboard> {
                         Get.to(AttendanceScreen());
                       } else if (controller.dashboardCards[index] ==
                           'Salary Slip') {
-                        Get.to(salaryslip_list());
+                        Get.to(SalarySlipList());
                       }
                       else if (controller.dashboardCards[index] ==
                           'Scan QRCode') {
