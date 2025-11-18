@@ -64,12 +64,8 @@ class _ApiDropdownState extends State<ApiDropdown> {
         : Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '',
-          style: const TextStyle(
-              fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87),
-        ),
-        const SizedBox(height: 6),
+
+        const SizedBox(height: 8),
         DropdownButtonHideUnderline(
           child: DropdownButton2<String>(
             isExpanded: true,

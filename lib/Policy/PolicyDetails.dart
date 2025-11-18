@@ -60,18 +60,10 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
       appBar: AppBar(
         title: const Text(
           'Policy Details',
-          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0072ff), Color(0xFF00c6ff)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+
+
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -79,7 +71,7 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
           ? Center(
         child: Text(
           errorMessage,
-          style: const TextStyle(color: Colors.red, fontSize: 16),
+          style: const TextStyle(color: Colors.grey, fontSize: 16),
         ),
       )
           : SingleChildScrollView(
@@ -293,13 +285,10 @@ class _PolicyDetailsPageState extends State<PolicyDetailsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [bgColor.withOpacity(0.8), bgColor.withOpacity(0.5)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: bgColor, // 🔴 background color
         borderRadius: BorderRadius.circular(20),
       ),
+
       child: Row(
         children: [
           Icon(icon, color: Colors.white, size: 14),

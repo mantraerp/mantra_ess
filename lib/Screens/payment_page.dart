@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import '../Global/constant.dart'; // for baseUrl
 import '../Global/webService.dart'; // if you store frappeUserEmail or token here
 import 'package:get_storage/get_storage.dart';
-import 'package:get/get.dart';
+import 'toast_helper.dart';
 final box = GetStorage();
 class PaymentPage extends StatefulWidget {
   const PaymentPage({super.key});
@@ -61,13 +61,13 @@ class _PaymentPageState extends State<PaymentPage> {
       final data = jsonDecode(response.body);
       print(data);
       if (data["message"]["status"] == "success") {
-        _showSnack("OTP sent successfully!");
+        ToastUtils.show(context,"OTP sent successfully!");
         _showOtpDialog();
       } else {
-        _showSnack(data["message"]["message"] ?? "Failed to send OTP");
+        ToastUtils.show(context,data["message"]["message"] ?? "Failed to send OTP");
       }
     } catch (e) {
-      _showSnack("Error sending OTP: $e");
+      ToastUtils.show(context,"Error sending OTP: $e");
     } finally {
       setState(() => _isProcessing = false);
     }
@@ -75,7 +75,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
   Future<void> _verifyOtp(String otp) async {
     if (otp.isEmpty) {
-      _showSnack("Please enter OTP");
+      ToastUtils.show(context,"Please enter OTP");
       return;
     }
 
@@ -100,7 +100,7 @@ class _PaymentPageState extends State<PaymentPage> {
       final data = jsonDecode(response.body);
       print(data);
       if (data['message']["status"] == "success") {
-        _showSnack(data["message"]["message"]);
+        ToastUtils.show(context,data["message"]["message"]);
         Navigator.pop(context); // close OTP dialog
 
         // 🔹 Call your upload bank file logic or refresh list
@@ -110,24 +110,20 @@ class _PaymentPageState extends State<PaymentPage> {
         });
         await fetchPayments();
       } else {
-        _showSnack(data["message"] ?? "Invalid OTP");
+        ToastUtils.show(context,data["message"] ?? "Invalid OTP");
       }
     } catch (e) {
-      _showSnack("Error verifying OTP: $e");
+      ToastUtils.show(context,"Error verifying OTP: $e");
     } finally {
       setState(() => _isProcessing = false);
     }
   }
 
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.blueAccent),
-    );
-  }
+
 
   void _showConfirmDialog() {
     if (selectedPaymentIds.isEmpty) {
-      _showSnack("Please select at least one payment or salary slip.");
+      ToastUtils.show(context,"Please select at least one payment or salary slip.");
       return;
     }
 
@@ -400,6 +396,7 @@ class _PaymentPageState extends State<PaymentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Payments"),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

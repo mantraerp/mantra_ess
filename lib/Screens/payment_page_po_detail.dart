@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:mantra_ess/Screens/toast_helper.dart';
 import 'purchase_order_detail_screen.dart';
 import 'purchase_invoice_detail_screen.dart';
 import 'purchase_receipt_detail_screen.dart';
@@ -44,9 +45,8 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
         page = PurchaseReceiptDetailScreen(purchaseReceiptName: docName);
         break;
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No detail screen available")),
-        );
+        ToastUtils.show(context,"No detail screen available");
+
         return;
     }
 
@@ -163,9 +163,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                     String paymentId = widget.paymentEntryId;
 
                     if (paymentId.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Payment ID is missing")),
-                      );
+                      ToastUtils.show(context,"Payment ID is missing");
                       return;
                     }
 
@@ -213,9 +211,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
                       );
                     } catch (e) {
                       setStateDialog(() => isLoading = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Error: $e")),
-                      );
+                      ToastUtils.show(context,"Error: $e");
                     }
                   },
                   child: const Text("Update"),

@@ -11,7 +11,8 @@ import 'create_purchase_order_screen.dart';
 import 'filter_screen.dart';
 
 class PurchaseOrderListScreen extends StatefulWidget {
-  const PurchaseOrderListScreen({Key? key}) : super(key: key);
+  final bool refresh;
+  const PurchaseOrderListScreen({Key? key, this.refresh = false}) : super(key: key);
 
   @override
   State<PurchaseOrderListScreen> createState() => _PurchaseOrderListScreenState();
@@ -47,7 +48,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     toDate = DateFormat('yyyy-MM-dd').format(now);
 
     _fetchStatusOptions();
-    _fetchPurchaseOrders(isRefresh: true);
+    _fetchPurchaseOrders(isRefresh: widget.refresh);
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=

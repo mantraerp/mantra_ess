@@ -11,7 +11,7 @@ class BatchDetailsPage extends StatefulWidget {
 }
 
 class _BatchDetailsPageState extends State<BatchDetailsPage> {
-  dynamic batchData,TrackData;
+  dynamic batchData, trackData;
   bool isLoading = true;
   String errorMessage = '';
 
@@ -25,350 +25,190 @@ class _BatchDetailsPageState extends State<BatchDetailsPage> {
     try {
       var data = await apiTrackBatchNumber(widget.batchNumber);
       setState(() {
-        if (data['batch_data'] != null && data['batch_data'].isNotEmpty) {
-          batchData = data['batch_data'];
-          errorMessage = '';
-        } else {
-          batchData = null;
-          errorMessage = data['message'] ?? 'No Batch data found';
-        }
-
-        if (data['data'] != null && data['data'].isNotEmpty) {
-          TrackData = List<Map<String, dynamic>>.from(data['data']);
-        } else {
-          TrackData = [];
-        }
+        batchData = data['batch_data'] ?? [];
+        trackData = data['data'] ?? [];
+        errorMessage = batchData.isEmpty
+            ? (data['message'] ?? 'No Batch data found')
+            : '';
         isLoading = false;
       });
     } catch (e) {
       setState(() {
-        batchData = null;
-        TrackData = [];
+        batchData = [];
+        trackData = [];
         errorMessage = 'Error fetching data: $e';
         isLoading = false;
       });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Batch Number Details - ${widget.batchNumber}'),
-        backgroundColor: Colors.teal,
-        centerTitle: true,
+  Widget sectionHeader(IconData icon, String title, Color color) {
+    return Container(
+      width: 300,
+      margin: const EdgeInsets.only(top: 16, bottom: 8,left:50),
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 55),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 2))
+        ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : batchData == null
-          ? Center(
-        child: Text(
-          errorMessage,
-          style: const TextStyle(color: Colors.red, fontSize: 16),
-        ),
-      )
-          : SingleChildScrollView(
-        scrollDirection: Axis.vertical,
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 5),
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$label: ",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Expanded(child: Text(value.isNotEmpty ? value : '-', softWrap: true)),
+        ],
+      ),
+    );
+  }
+
+  Widget buildBatchCard(Map<String, dynamic> item) {
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  // borderRadius: BorderRadius.all(Radius.circular(0)),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Item Information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // white text
-                    ),
-                  ),
-                ),
-              ),
+            Text(
+              item['item_name'] ?? 'Unnamed Item',
+              style: const TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
             ),
-            // First Table
-            Container(
-              margin: const EdgeInsets.all(16),
-              child: Table(
-                border: TableBorder.all(color: Colors.black, width: 1),
-                defaultVerticalAlignment:
-                TableCellVerticalAlignment.middle,
-                columnWidths: const {
-                  0: FixedColumnWidth(90),
-                  1: FixedColumnWidth(150),
-                  2: FixedColumnWidth(120),
-                },
-                children: [
-                  // Table Header
-                  TableRow(
-                    decoration:
-                    const BoxDecoration(color: Color(0xFFDFF4F3)),
-
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Batch Number',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Item Details',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Additional Details',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Data Rows
-                  ...batchData.map<TableRow>((item) {
-                    return TableRow(
-                      decoration:
-                      const BoxDecoration(color: Colors.white),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(item['batch_no'] ?? '-',
-                              style:
-                              const TextStyle(color: Colors.black)),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(color: Colors.black, fontSize: 14),
-                              children: [
-                                TextSpan(
-                                  text: 'Name: ',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: '${item['item_name'] ?? '-'}\n',
-                                ),
-                                TextSpan(
-                                  text: 'Manufacturing Date: ',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: '${item['manufacturing_date'] ?? '-'}\n',
-                                ),
-                                TextSpan(
-                                  text: 'Expiry Date: ',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: '${item['expiry_date'] ?? '-'}\n',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(color: Colors.black, fontSize: 14),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Code: ',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    TextSpan(
-                                      text: '${item['item_code'] ?? '-'}\n',
-                                    ),
-                                    TextSpan(
-                                      text: 'Batch Qty: ',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    TextSpan(
-                                      text: '${item['batch_qty'] ?? '-'}\n',
-                                    ),
-                                    TextSpan(
-                                      text: 'Source Document Type: ',
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    TextSpan(
-                                      text: '${item['source_document_type'] ?? '-'}\n',
-                                    ),
-                                  ],
-                                )
-                            )
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-
-            // Tracking Documents
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: const BoxDecoration(
-                  color: Colors.teal,
-                  // borderRadius: BorderRadius.all(Radius.circular(0)),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Document History',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // white text
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(16),
-              child: Table(
-                border: TableBorder.all(color: Colors.black, width: 1),
-                defaultVerticalAlignment:
-                TableCellVerticalAlignment.middle,
-                columnWidths: const {
-                  0: FixedColumnWidth(90),
-                  1: FixedColumnWidth(150),
-                  2: FixedColumnWidth(120),
-                },
-                children: [
-                  // Header
-                  const TableRow(
-                    decoration: BoxDecoration(color: Color(0xFFDFF4F3)),
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Document Name',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Document Details',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Additional Details',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Data rows (replace with your second table data)
-                  ...TrackData.map<TableRow>((row) {
-                    return TableRow(
-                      decoration:
-                      const BoxDecoration(color: Colors.white),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(row['document'] ?? '-'),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(color: Colors.black, fontSize: 14),
-                              children: [
-                                const TextSpan(text: 'Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                TextSpan(text: '${row['document_name'] ?? '-'}\n'),
-                                const TextSpan(text: 'Date: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                TextSpan(text: '${row['posting_date'] ?? '-'}\n'),
-                                if (row['document'] == 'Delivery Note') ...[
-                                  const TextSpan(text: 'Customer Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['dn_customer_name'] ?? '-'}\n'),
-                                ] else if (row['document'] == 'Sales Invoice') ...[
-                                  const TextSpan(text: 'Customer Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['si_customer_name'] ?? '-'}\n'),
-                                ] else if (row['document'] == 'Sales Order') ...[
-                                  const TextSpan(text: 'Customer Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['so_customer_name'] ?? '-'}\n'),
-                                ] else if (row['document'] == 'Stock Entry') ...[
-                                  const TextSpan(text: 'Type of Transaction: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['type_of_transaction'] ?? '-'}\n'),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: RichText(
-                            text: TextSpan(
-                              style: const TextStyle(color: Colors.black, fontSize: 14),
-                              children: [
-                                if (row['document'] == 'Delivery Note') ...[
-                                  const TextSpan(text: 'Customer: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['dn_customer'] ?? '-'}\n'),
-                                  const TextSpan(text: 'Warranty Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['dn_warranty_time_period'] ?? '-'}\n'),
-                                  const TextSpan(text: 'RD Service Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['dn_rd_service_time_period'] ?? '-'}\n'),
-                                ] else if (row['document'] == 'Sales Order') ...[
-                                  const TextSpan(text: 'Customer: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['so_customer'] ?? '-'}\n'),
-                                  const TextSpan(text: 'Warranty Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['so_warranty_time_period'] ?? '-'}\n'),
-                                  const TextSpan(text: 'RD Service Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['so_rd_service_time_period'] ?? '-'}\n'),
-                                  const TextSpan(text: 'Delivery: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['delivey_note'] ?? '-'}\n'),
-                                ] else if (row['document'] == 'Sales Invoice') ...[
-                                  const TextSpan(text: 'Customer: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['si_customer'] ?? '-'}\n'),
-                                  const TextSpan(text: 'Warranty Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['si_warranty_time_period'] ?? '-'}\n'),
-                                  const TextSpan(text: 'RD Service Time Period: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['si_rd_service_time_period'] ?? '-'}\n'),
-                                  const TextSpan(text: 'Delivery: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                                  TextSpan(text: '${row['delivey_note'] ?? '-'}\n'),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
+            const Divider(),
+            infoRow('Batch Number', item['batch_no'] ?? ''),
+            infoRow('Item Code', item['item_code'] ?? ''),
+            infoRow('Batch Quantity', item['batch_qty']?.toString() ?? ''),
+            infoRow('Manufacturing Date', item['manufacturing_date'] ?? ''),
+            infoRow('Expiry Date', item['expiry_date'] ?? ''),
+            infoRow('Source Document Type', item['source_document_type'] ?? ''),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildTrackCard(Map<String, dynamic> row) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(row['document'] ?? '-',
+                style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent)),
+            const SizedBox(height: 4),
+            const Divider(),
+            infoRow('Document Name', row['document_name'] ?? ''),
+            infoRow('Date', row['posting_date'] ?? ''),
+
+            if (row['document'] == 'Delivery Note') ...[
+              infoRow('Customer Name', row['dn_customer_name'] ?? ''),
+              infoRow('Customer', row['dn_customer'] ?? ''),
+              infoRow('Warranty Time Period', row['dn_warranty_time_period'] ?? ''),
+              infoRow('RD Service Time Period', row['dn_rd_service_time_period'] ?? ''),
+            ] else if (row['document'] == 'Sales Invoice') ...[
+              infoRow('Customer Name', row['si_customer_name'] ?? ''),
+              infoRow('Customer', row['si_customer'] ?? ''),
+              infoRow('Warranty Time Period', row['si_warranty_time_period'] ?? ''),
+              infoRow('RD Service Time Period', row['si_rd_service_time_period'] ?? ''),
+              infoRow('Delivery', row['delivey_note'] ?? ''),
+            ] else if (row['document'] == 'Sales Order') ...[
+              infoRow('Customer Name', row['so_customer_name'] ?? ''),
+              infoRow('Customer', row['so_customer'] ?? ''),
+              infoRow('Warranty Time Period', row['so_warranty_time_period'] ?? ''),
+              infoRow('RD Service Time Period', row['so_rd_service_time_period'] ?? ''),
+              infoRow('Delivery', row['delivey_note'] ?? ''),
+            ] else if (row['document'] == 'Stock Entry') ...[
+              infoRow('Type of Transaction', row['type_of_transaction'] ?? ''),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+
+      appBar: AppBar(
+        title: Text('Batch Details - ${widget.batchNumber}'),
+
+        centerTitle: true,
+
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.grey))
+          : errorMessage.isNotEmpty
+          ? Center(
+        child: Text(
+          errorMessage,
+          style: const TextStyle(color: Colors.grey, fontSize: 16),
+        ),
+      )
+          : RefreshIndicator(
+        onRefresh: fetchSerialDetails,
+
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (batchData.isNotEmpty) ...[
+              sectionHeader(Icons.inventory_2, 'Item Information', Colors.grey),
+              ...batchData.map<Widget>((e) => buildBatchCard(e)).toList()],
+              if (trackData.isNotEmpty) ...[
+              sectionHeader(Icons.description, 'Document History', Colors.grey),
+              ...trackData.map<Widget>((e) => buildTrackCard(e)).toList(),
+              const SizedBox(height: 20)
+            ],
+          if (batchData.isEmpty && trackData.isEmpty)
+            Center(
+              child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'No batch or document data found.',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 16,
+                  fontStyle: FontStyle.italic,
+                ),
+
+              ),
+            ),
+          )],
+          ),
         ),
       ),
     );

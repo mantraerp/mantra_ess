@@ -14,14 +14,14 @@ class ItemsScreen extends StatelessWidget {
     NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+
       appBar: AppBar(
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+
       ),
       body: itemList.isEmpty
           ? const Center(

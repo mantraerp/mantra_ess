@@ -86,8 +86,6 @@ class HolidayListState extends State<HolidayList> {
       appBar: AppBar(
         title: const Text('Holiday Calendar'),
         centerTitle: true,
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())

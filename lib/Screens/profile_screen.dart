@@ -15,7 +15,7 @@ class ProfileScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text('Profile'),
             centerTitle: true,
-            backgroundColor: Colors.blue,
+
           ),
           body: controller.profileData != null
               ? SingleChildScrollView(

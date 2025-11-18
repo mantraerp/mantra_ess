@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class FilterDialogBase extends StatefulWidget {
   final String title;
@@ -140,36 +141,47 @@ class _FilterDialogBaseState extends State<FilterDialogBase> {
             _datePickerRow("To Date", formatDate(tempTo), () => pickDate(false)),
             const SizedBox(height: 12),
 
-            DropdownButtonFormField<String>(
-              value: tempStatus,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: "Status",
-                filled: true,
-                fillColor: Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-              dropdownColor: Colors.white,
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
-              items: widget.statusOptions
-                  .map((e) => DropdownMenuItem(
-                value: e,
-                child: Row(
-                  children: [
-                    const Icon(Icons.circle, size: 8, color: Colors.blueAccent),
-                    const SizedBox(width: 6),
-                    Text(e),
-                  ],
-                ),
-              ))
-                  .toList(),
-              onChanged: (v) => setState(() => tempStatus = v),
-            ),
 
-            const SizedBox(height: 20),
+
+      DropdownButtonFormField2<String>(
+      value: tempStatus,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: "Status",
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
+        dropdownStyleData: DropdownStyleData(
+          maxHeight: 200, // 👈 limits dropdown height (scrollable)
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+          ),
+        ),
+
+
+        style: const TextStyle(fontSize: 14, color: Colors.black87),
+        items: widget.statusOptions
+            .map((e) => DropdownMenuItem<String>(
+          value: e,
+          child: Row(
+            children: [
+              const Icon(Icons.circle, size: 8, color: Colors.blueAccent),
+              const SizedBox(width: 6),
+              Text(e),
+            ],
+          ),
+        ))
+            .toList(),
+        onChanged: (v) => setState(() => tempStatus = v),
+      ),
+
+
+        const SizedBox(height: 20),
             Center(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.check, size: 18),

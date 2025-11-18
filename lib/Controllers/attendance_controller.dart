@@ -2,21 +2,24 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
 import 'package:mantra_ess/Models/attendance_model.dart';
-import 'package:mantra_ess/utils.dart';
 
 class AttendanceController extends GetxController {
   // 🔹 Reactive variables
   RxList<AttendanceRecord> attendanceList = <AttendanceRecord>[].obs;
   RxBool isLoading = false.obs;
-  RxMap<String, int> summary = <String, int>{}.obs;
+  RxMap<String, int> attendance_count = <String, int>{}.obs;
 
-  DateTime defaultFromDate = DateTime.now().subtract(const Duration(days: 30));
-  DateTime defaultToDate = DateTime.now();
+  // 🔹 Last month as default
+  DateTime defaultFromDate =
+  DateTime(DateTime.now().year, DateTime.now().month - 1, 1);
+  DateTime defaultToDate = DateTime(DateTime.now().year, DateTime.now().month, 0);
 
-  Rx<DateTime> fromDate = DateTime.now().subtract(const Duration(days: 30)).obs;
-  Rx<DateTime> toDate = DateTime.now().obs;
+  Rx<DateTime> fromDate =
+      DateTime(DateTime.now().year, DateTime.now().month - 1, 1).obs;
+  Rx<DateTime> toDate =
+      DateTime(DateTime.now().year, DateTime.now().month, 0).obs;
 
-  // 🔹 Filter status (All, Present, Absent, Half Day, On Leave)
+  // 🔹 Filter status (All, Present, Absent, Half Day, On Leave, Week-off)
   RxString filterStatus = 'All'.obs;
 
   // 🔹 Reactive filter state for date range
@@ -48,17 +51,18 @@ class AttendanceController extends GetxController {
         attendanceList.value = res.data;
 
         // ✅ Handle summary safely
-        if (res.summary != null && res.summary.isNotEmpty) {
-          summary.value = {
-            'Present': res.summary['Present'] ?? 0,
-            'Absent': res.summary['Absent'] ?? 0,
-            'On Leave': res.summary['On Leave'] ?? 0,
-            'Half Day': res.summary['Half Day'] ?? 0,
-            'Total Days': res.summary['Total Days'] ?? 0,
-            'Week-Off': res.summary[ "Week-off"] ?? 0,
+        if (res.attendance_count != null && res.attendance_count!.isNotEmpty) {
+          attendance_count.value = {
+            'Present': res.attendance_count!['Present'] ?? 0,
+            'Absent': res.attendance_count!['Absent'] ?? 0,
+            'On Leave': res.attendance_count!['On Leave'] ?? 0,
+            'Half Day': res.attendance_count!['Half Day'] ?? 0,
+            'Week-Off': res.attendance_count!['Week-off'] ?? 0,
+            'Holiday': res.attendance_count!['Holiday'] ?? 0,
+            'Total Days': res.attendance_count!['Total Days'] ?? 0,
           };
         } else {
-          summary.clear();
+          attendance_count.clear();
         }
 
         // Reset filter to 'All' whenever new data is fetched
@@ -90,6 +94,11 @@ class AttendanceController extends GetxController {
           return true;
       }
     }).toList();
+  }
+
+  // 🔹 Helper: Compare dates ignoring time
+  bool isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
   @override

@@ -19,6 +19,9 @@ class AttendanceScreen extends StatelessWidget {
         return Colors.red.shade100;
       case 'W':
         return Colors.orange.shade100;
+      case 'H':
+        return Colors.lightBlue.shade100;
+
       default:
         return Colors.grey.shade200;
     }
@@ -31,6 +34,8 @@ class AttendanceScreen extends StatelessWidget {
         return Colors.green.shade800;
       case 'A':
         return Colors.red.shade800;
+      case 'H':
+        return Colors.blue;
 
       case 'W':
         return Colors.orange.shade800;
@@ -292,12 +297,13 @@ class AttendanceScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Attendance Summary'),
-        backgroundColor: Colors.white,
-        elevation: 0,
+        centerTitle: true,
+
         actions: [
+
           IconButton(
             onPressed: () => pickDateRange(context),
-            icon: const Icon(Icons.filter_alt_outlined),
+            icon: const Icon(Icons.filter_list),
           ),
         ],
       ),
@@ -307,8 +313,9 @@ class AttendanceScreen extends StatelessWidget {
         }
 
         final filteredList = controller.getFilteredList();
-        final summary = controller.summary;
-        print(summary);
+        final summary = controller.attendance_count;
+
+
 
         return Padding(
           padding: const EdgeInsets.all(12.0),
@@ -370,11 +377,13 @@ class AttendanceScreen extends StatelessWidget {
                         ? 'Absent'
                         : data.minopStatus == 'W'
                         ? 'Week Off'
+                        : data.minopStatus == 'H'
+                        ? 'Holiday'
                         : '-';
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         color: getStatusColor(data.minopStatus, data.leaveType),
                         borderRadius: BorderRadius.circular(14),
@@ -388,24 +397,38 @@ class AttendanceScreen extends StatelessWidget {
                           // Left: vertical date in border
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 12),
+                                vertical: 5, horizontal: 12),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black),
+
                               borderRadius: BorderRadius.circular(8),
-                              color: Colors.white.withOpacity(0.2),
+
                             ),
-                            child: Column(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(day,
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                Text(month,
-                                    style: const TextStyle(fontSize: 14)),
-                                Text(year,
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.grey)),
+                                Text(
+                                  day,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  month,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  year,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -419,7 +442,7 @@ class AttendanceScreen extends StatelessWidget {
                                 Text(
                                   statusText,
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: getStatusTextColor(
                                         data.minopStatus, data.leaveType),

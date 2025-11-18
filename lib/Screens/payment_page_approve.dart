@@ -4,6 +4,7 @@ import '../Models/payment_entry_model.dart';
 import '../Models/salary_slip_model.dart';
 import 'payment_api.dart';
 import 'payment_page_approve_filter_screen.dart';
+import 'toast_helper.dart';
 import 'payment_page_po_detail.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -49,12 +50,6 @@ class _PaymentPageState extends State<PaymentApprovePage> {
   }
 
 
-
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.blueAccent),
-    );
-  }
 
 
 
@@ -142,10 +137,9 @@ class _PaymentPageState extends State<PaymentApprovePage> {
         );
       }
     } catch (e) {
-      debugPrint("Error fetching payment detail: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to fetch payment details")),
-      );
+
+
+      ToastUtils.show(context, "Failed to fetch payment details");
     }
   }
 
@@ -182,13 +176,11 @@ class _PaymentPageState extends State<PaymentApprovePage> {
         groupedPayments = _groupByParty(payments);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment Approved successfully")),
-      );
+
+      ToastUtils.show(context,"Payment Approved successfully");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error approving payment: $e")),
-      );
+
+      ToastUtils.show(context,"Error approving payment: $e");
     }
   }
 
@@ -226,13 +218,10 @@ class _PaymentPageState extends State<PaymentApprovePage> {
         groupedPayments = _groupByParty(payments);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment rejected successfully")),
-      );
+      ToastUtils.show(context,"Payment rejected successfully");
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error rejecting payment: $e")),
-      );
+      ToastUtils.show(context,"Error rejecting payment: $e");
+
     }
   }
 
@@ -268,14 +257,11 @@ class _PaymentPageState extends State<PaymentApprovePage> {
         payments.removeWhere((p) => p.id == entry.id);
         groupedPayments = _groupByParty(payments);
       });
+      ToastUtils.show(context,"Payment hold successfully");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Payment hold successfully")),
-      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error hold payment: $e")),
-      );
+      ToastUtils.show(context,"Error hold payment: $e");
+
     }
   }
 
@@ -287,6 +273,7 @@ class _PaymentPageState extends State<PaymentApprovePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Payments"),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

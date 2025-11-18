@@ -19,11 +19,11 @@ class DataDisplayScreen extends StatelessWidget {
     final Map<String, dynamic> details = data['data'] ?? {};
 
     return Scaffold(
-      backgroundColor: Colors.white,
+
       appBar: AppBar(
         title: const Text("Label Details"),
         centerTitle: true,
-        backgroundColor: Colors.blue[700], // Medium blue
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

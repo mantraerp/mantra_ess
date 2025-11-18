@@ -131,6 +131,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       appBar: AppBar(
         title: Text(widget.purchaseOrderName),
         elevation: 1,
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -262,11 +263,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.15), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
@@ -294,7 +291,7 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           ),
           subtitle: Text(
             subtitle,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: Colors.black),
           ),
           trailing: const Icon(Icons.arrow_forward_ios_rounded,
               size: 18, color: Colors.grey),
