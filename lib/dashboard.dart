@@ -20,6 +20,7 @@ import 'package:mantra_ess/Policy/PolicyList.dart';
 import 'package:mantra_ess/Holiday/HolidayList.dart';
 import 'package:mantra_ess/Screens/expense_claim_list.dart';
 import 'package:mantra_ess/Screens/material_request_screen.dart';
+import 'package:mantra_ess/Screens/item_list.dart';
 
 class dashboard extends StatefulWidget {
   const dashboard({super.key});
@@ -140,6 +141,10 @@ class _dashboardState extends State<dashboard> {
                       else if (controller.dashboardCards[index] ==
                           'Material Request') {
                         Get.to(MaterialRequestScreenListScreen());
+                      }
+                      else if (controller.dashboardCards[index] ==
+                          'Items') {
+                        Get.to(ItemListPage());
                       }
                       else if (controller.dashboardCards[index] ==
                           'Payment Page Approve') {

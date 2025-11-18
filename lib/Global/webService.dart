@@ -63,6 +63,12 @@ const String GetPurchaseOrderDetail =
 const String GetItemDetails =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.get_item_details";
 
+const String GetItemList =
+    SUB_BASE_URL + "erp_mobile.api.item.get_item_list";
+
+const String GetItemAndStockDetail =
+    SUB_BASE_URL + "erp_mobile.api.item.get_item_details";
+
 const String GetSalesOrders =
     SUB_BASE_URL + "erp_mobile.api.sales_order.get_sales_orders";
 

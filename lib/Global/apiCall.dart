@@ -467,3 +467,36 @@ Future<dynamic> apiExpenseClaimList(
     return _handleFailResponse(response);
   }
 }
+
+Future<dynamic> apiGetItemList({String? search_string,String? disabled}) async {
+  final sid = box.read(SID);
+  String baseUrl = "$GetItemList";
+
+  if (search_string != null && search_string.isNotEmpty) {
+    baseUrl += "?search_string=$search_string";
+  }
+
+  if (disabled != null && disabled.isNotEmpty) {
+    // Append the 'disable' filter to the API request
+    baseUrl += (baseUrl.contains('?') ? '&' : '?') + 'disabled=$disabled';
+  }
+
+  final response = await http.get(Uri.parse(baseUrl), headers: {'Cookie': 'sid=$sid'});
+  final statusCode = response.statusCode;
+
+  if (statusCode == 200) {
+    try{
+      final res = jsonDecode(response.body);
+      if (res != null && res['data'] != null && res['data']['item_list'] != null) {
+        return res['data']['item_list'];
+      } else {
+        return [];
+      }
+    }catch (e) {
+      print("Error decoding response: $e");
+      return [];
+    }
+  }else {
+    return _handleFailResponse(response);
+  }
+}
