@@ -1,4 +1,3 @@
-// create_purchase_order_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -7,10 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:mantra_ess/Global/webService.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:mantra_ess/Global/constant.dart';
-
-// ---------------------
-// Edit these to match your server (GetPoNamingSeries etc. should be provided in webService)
-// ---------------------
+import 'package:mantra_ess/Screens/toast_helper.dart';
+import 'purchase_order_screen.dart';
 
 class CreatePurchaseOrderScreen extends StatefulWidget {
   final bool isNew; // Add this line
@@ -28,26 +25,18 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
 
   late TabController _tabController;
   int _lastTabIndex = 0;
-
-  // Saved form per tab (in-memory)
   final Map<String, dynamic> _savedForm = {
     "details": {},
     "items": {},
     "taxes": {},
-    "terms": {},
-    "attachments": {},
-  };
 
-  // Track unsaved changes per tab
+  };
   final Map<int, bool> _unsaved = {
     0: false,
     1: false,
     2: false,
-    3: false,
-    4: false,
-  };
 
-  // Form keys and controllers
+  };
   final GlobalKey<FormState> _detailsFormKey = GlobalKey<FormState>();
   final TextEditingController _transactionDateController =
   TextEditingController();
@@ -56,8 +45,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
   final TextEditingController _remarksController = TextEditingController();
 
   DateTime _transactionDate = DateTime.now();
-
-  // Details fields
   String? _selectedSeries;
   String? _selectedPurchaseType;
   String? _selectedSupplier; // this will contain the supplier "name" (unique id)
@@ -68,15 +55,15 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
   String? _selectedWarehouse;
   String? _selectedProject;
   String? _selectedCompany;
-
-
-  // Dropdown data and loading flags
   List<String> _namingSeries = [];
   List<String> _purchaseTypes = [];
   List<String> _suppliers = [];
   List<String> _purchasePersons = [];
   List<String> _poApprovers = [];
   List<String> _currencies = [];
+  List<TaxLine> _taxes = [];
+
+
 
   List<String> _warehouses = [];
 
@@ -89,23 +76,9 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
   bool _loadingCurrencies = true;
   bool _loadingProjects = true;
   bool _loadingWarehouses = true;
-
-  // Items child table
   List<PurchaseOrderItem> _items = [];
 
-  // Taxes (simple)
-  // List<TaxLine> _taxes = [];
-
-  // Terms
-  List<String> _terms = [];
-
-  // Attachments placeholder (store file paths or server ids once implemented)
-  List<String> _attachments = [];
-
-  // Submit state
   bool _isSubmitting = false;
-
-  // Dropdown search controller used by DropdownButton2
   final TextEditingController _dropdownSearchController =
   TextEditingController();
 
@@ -114,8 +87,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     super.initState();
 
     final box = GetStorage();
-    print(widget.isNew);
-    // 🟠 Clear previous draft if this is a new PO
     if (widget.isNew == true) {
       box.remove('purchase_order_draft');
     }
@@ -131,18 +102,11 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
         DateFormat('dd-MM-yyyy').format(_transactionDate);
     _requiredByController.text = "";
     _loadAllDropdowns();
-
-    // Attach listeners to mark unsaved
     _remarksController.addListener(() => _markUnsaved(0));
     _transactionDateController.addListener(() => _markUnsaved(0));
     _requiredByController.addListener(() => _markUnsaved(0));
     _odooPoController.addListener(() => _markUnsaved(0));
   }
-
-
-
-
-
   @override
   void dispose() {
 
@@ -153,10 +117,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     _dropdownSearchController.dispose();
     super.dispose();
   }
-
-  // ---------------- Persistent storage helpers ----------------
   void _loadSavedFromStorage() {
-    // Load each tab saved JSON (if present)
     try {
       final d = box.read('po_saved_details');
       if (d != null && d is Map) {
@@ -183,35 +144,20 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
         _odooPoController.text =
             _savedForm['details']['odoo_po'] ?? _odooPoController.text;
       }
-
       final it = box.read('po_saved_items');
       if (it != null && it is List) {
         _savedForm['items'] = List.from(it);
         _restoreItemsTab();
       }
-
       final tx = box.read('po_saved_taxes');
       if (tx != null && tx is List) {
         _savedForm['taxes'] = List.from(tx);
         _restoreTaxesTab();
       }
-
-      final tr = box.read('po_saved_terms');
-      if (tr != null && tr is List) {
-        _savedForm['terms'] = List<String>.from(tr);
-        _restoreTermsTab();
-      }
-
-      final at = box.read('po_saved_attachments');
-      if (at != null && at is List) {
-        _savedForm['attachments'] = List<String>.from(at);
-        _restoreAttachmentsTab();
-      }
     } catch (e) {
       debugPrint("Error loading saved PO from storage: $e");
     }
   }
-
   Future<void> _persistTabToStorage(String tabKey) async {
     try {
       switch (tabKey) {
@@ -224,32 +170,23 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
         case 'taxes':
           await box.write('po_saved_taxes', _savedForm['taxes']);
           break;
-        case 'terms':
-          await box.write('po_saved_terms', _savedForm['terms']);
-          break;
-        case 'attachments':
-          await box.write('po_saved_attachments', _savedForm['attachments']);
-          break;
+
+
       }
     } catch (e) {
       debugPrint("Error persisting $tabKey to storage: $e");
     }
   }
-
-  // ---------------- mark unsaved ----------------
   void _markUnsaved(int tabIndex) {
     setState(() {
       _unsaved[tabIndex] = true;
     });
   }
-
   void _clearUnsaved(int tabIndex) {
     setState(() {
       _unsaved[tabIndex] = false;
     });
   }
-
-  /// ---------- Tab save / restore ----------
   void _saveTabByIndex(int index) {
     switch (index) {
       case 0:
@@ -261,15 +198,8 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       case 2:
         _saveTaxesTab();
         break;
-      case 3:
-        _saveTermsTab();
-        break;
-      case 4:
-        _saveAttachmentsTab();
-        break;
     }
   }
-
   void _restoreTabByIndex(int index) {
     switch (index) {
       case 0:
@@ -281,23 +211,14 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       case 2:
         _restoreTaxesTab();
         break;
-      case 3:
-        _restoreTermsTab();
-        break;
-      case 4:
-        _restoreAttachmentsTab();
-        break;
     }
   }
-
-  /// ---------- Load dropdown data ----------
   Future<void> _loadAllDropdowns() async {
     setState(() {
       _loadingNamingSeries = _loadingPurchaseTypes = _loadingSuppliers =
           _loadingPurchasePersons = _loadingApprovers = _loadingCurrencies =
           _loadingProjects = _loadingWarehouses = true;
     });
-
     await Future.wait([
       _fetchNamingSeries(),
       _fetchPurchaseTypes(),
@@ -309,15 +230,10 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       _fetchProject(),
       _fetchCompany()
     ]);
-
-
-
     setState(() {});
   }
-
   Future<void> _fetchNamingSeries() async {
     try {
-      final sid = box.read("SID");
       final url = Uri.parse("$GetPoNamingSeries");
       final resp = await http.get(url, headers: headers);
       if (resp.statusCode == 200) {
@@ -334,7 +250,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchPurchaseTypes() async {
     try {
       final sid = box.read("SID");
@@ -352,7 +267,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchSuppliers({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -372,7 +286,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchCompany({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -381,9 +294,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       if (resp.statusCode == 200) {
         final j = json.decode(resp.body);
         final data = j["data"] ?? j;
-        print(data);
         if (data is List) {
-
           setState(() => _selectedCompany = j['data'][0]?.toString());
         }
       }
@@ -394,7 +305,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchPurchasePersons({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -412,7 +322,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchPoApprovers() async {
     try {
       final sid = box.read("SID");
@@ -430,7 +339,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchCurrencies({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -450,7 +358,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
   Future<void> _fetchWarehouses({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -470,9 +377,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
-
-
   Future<void> _fetchProject({String search = ""}) async {
     try {
       final sid = box.read("SID");
@@ -492,8 +396,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() {});
     }
   }
-
-  /// ---------- Fetch supplier display name ----------
   Future<void> _fetchSupplierName(String supplierId) async {
     try {
       final sid = box.read("SID");
@@ -508,8 +410,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       setState(() => _supplierName = supplierId);
     }
   }
-
-  /// ---------- Date pickers ----------
   Future<void> _pickTransactionDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -526,7 +426,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       });
     }
   }
-
   Future<void> _pickRequiredByDate() async {
     final now = DateTime.now();
     final picked = await showDatePicker(
@@ -542,8 +441,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       });
     }
   }
-
-  /// ---------- Save/Restore for each tab ----------
   void _saveDetailsTab() {
     _savedForm['details'] = {
       'naming_series': _selectedSeries,
@@ -561,13 +458,10 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       'remarks': _remarksController.text,
 
     };
-    // persist
     _persistTabToStorage('details');
     _clearUnsaved(0);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Details saved")));
-  }
 
+  }
   void _restoreDetailsTab() {
     final Map? d = _savedForm['details'] as Map?;
     if (d == null) return;
@@ -590,9 +484,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       _odooPoController.text = d['odoo_po'] ?? _odooPoController.text;
     });
   }
-
   void _saveItemsTab() {
-    // _items is already the canonical list; save a serializable copy
     _savedForm['items'] = _items
         .map((it) => {
       'item_code': it.itemCode,
@@ -603,10 +495,8 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
         .toList();
     _persistTabToStorage('items');
     _clearUnsaved(1);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Items saved")));
-  }
 
+  }
   void _restoreItemsTab() {
     final data = _savedForm['items'];
     if (data is List) {
@@ -626,60 +516,26 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       });
     }
   }
-
   void _saveTaxesTab() {
-    // _savedForm['taxes'] =
-    //     _taxes.map((t) => {'description': t.description, 'rate': t.rate}).toList();
     _persistTabToStorage('taxes');
     _clearUnsaved(2);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Taxes saved")));
+
   }
 
   void _restoreTaxesTab() {
-    // final data = _savedForm['taxes'];
-    // if (data is List) {
-    //   setState(() {
-    //     _taxes = data.map<TaxLine>((m) {
-    //       return TaxLine(
-    //           description: (m['description'] ?? '').toString(),
-    //           rate: (m['rate'] is num)
-    //               ? (m['rate'] as num).toDouble()
-    //               : double.tryParse((m['rate'] ?? '0').toString()) ?? 0);
-    //     }).toList();
-    //   });
-    // }
-  }
-
-  void _saveTermsTab() {
-    _savedForm['terms'] = List<String>.from(_terms);
-    _persistTabToStorage('terms');
-    _clearUnsaved(3);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Terms saved")));
-  }
-
-  void _restoreTermsTab() {
-    final data = _savedForm['terms'];
+    final data = _savedForm['taxes'];
     if (data is List) {
-      setState(() => _terms = List<String>.from(data));
+      setState(() {
+        _taxes = data.map((t) => TaxLine(
+          description: t['description'],
+          rate: t['rate'],
+
+        )).toList();
+      });
     }
   }
 
-  void _saveAttachmentsTab() {
-    _savedForm['attachments'] = List<String>.from(_attachments);
-    _persistTabToStorage('attachments');
-    _clearUnsaved(4);
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Attachments saved")));
-  }
 
-  void _restoreAttachmentsTab() {
-    final data = _savedForm['attachments'];
-    if (data is List) setState(() => _attachments = List<String>.from(data));
-  }
-
-  /// ---------- Confirm before navigating (used by TabBar onTap) ----------
   Future<bool> _confirmSaveDiscardIfUnsaved(int fromIndex) async {
     if (_unsaved[fromIndex] != true) return true; // nothing to do
     final res = await showDialog<String>(
@@ -705,9 +561,6 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       return false; // canceled
     }
   }
-
-
-
   Future<void> _showAddEditItemDialog({PurchaseOrderItem? item, int? index}) async {
     final codeCtrl = TextEditingController(text: item?.itemCode ?? "");
     final descCtrl = TextEditingController(text: item?.description ?? "");
@@ -759,7 +612,8 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       try {
         final res = await http.get(Uri.parse(
           "$GetItemDetails?item_code=$itemCode&company=${_selectedCompany ?? ''}",
-        ));
+
+        ),  headers:headers);
         if (res.statusCode == 200) {
           final data = jsonDecode(res.body);
           final details = data["data"]["item_detail"];
@@ -949,9 +803,8 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
                   final rate = double.tryParse(rateCtrl.text.trim()) ?? 0;
 
                   if (code.isEmpty || qty <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Enter valid item code and quantity")),
-                    );
+                    ToastUtils.show(context,"Enter valid item code and quantity");
+
                     return;
                   }
 
@@ -1016,57 +869,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     });
   }
 
-  /// ---------- Taxes & Terms simple editors ----------
-  Future<void> _addTaxLine() async {
-    final desc = TextEditingController();
-    final rate = TextEditingController(text: "0");
-    await showDialog(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text("Add Tax Line"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(controller: desc, decoration: const InputDecoration(labelText: "Description")),
-            const SizedBox(height: 8),
-            TextFormField(controller: rate, keyboardType: TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: "Rate (%)")),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              // setState(() {
-              //   _taxes.add(TaxLine(description: desc.text.trim(), rate: double.tryParse(rate.text) ?? 0));
-              //   _markUnsaved(2);
-              // });
-              Navigator.pop(c);
-            },
-            child: const Text("Add"),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Future<void> _addTerm() async {
-    final t = TextEditingController();
-    await showDialog(
-      context: context,
-      builder: (c) => AlertDialog(
-        title: const Text("Add Term/Condition"),
-        content: TextFormField(controller: t, decoration: const InputDecoration(labelText: "Term")),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(c), child: const Text("Cancel")),
-          ElevatedButton(onPressed: () => setState(() {
-            _terms.add(t.text.trim());
-            _markUnsaved(3);
-            Navigator.pop(c);
-          }), child: const Text("Add")),
-        ],
-      ),
-    );
-  }
 
   /// ---------- Submit ----------
   Map<String, dynamic> _buildPayload() {
@@ -1104,18 +907,61 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
     };
   }
 
+
+
+  Future<void> _addTaxForSupplier(String supplierName) async {
+    try {
+      final encodedSupplier = Uri.encodeComponent(supplierName);
+
+      final url = Uri.parse(
+          'http://192.168.11.66:8014/api/method/erp_mobile.api.masterdata.get_party_info'
+              '?party=$encodedSupplier'
+              '&party_type=Supplier'
+              '&doctype=Purchase Order'
+              '&company=Mantra Softech India Private Limited'
+              '&ignore_permissions=1');
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final apiTaxes = data['message']['taxes'] ?? [];
+
+        print(apiTaxes);
+
+        if (apiTaxes.isNotEmpty) {
+          // Remove previous supplier taxes
+          _taxes.removeWhere((t) => t.supplierTax);
+        }
+
+        // Add new taxes from API
+        for (var tax in apiTaxes) {
+          _taxes.add(TaxLine(
+            description: tax['description'] ?? "GST",
+            rate: tax['rate']?.toDouble() ?? 0.0,
+            amount: 0,
+            supplierTax: true,
+          ));
+        }
+
+
+
+        setState(() {});
+      } else {
+        print('Failed to fetch supplier info: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching supplier info: $e');
+    }
+  }
+
   Future<void> _submit() async {
     if (!_detailsFormKey.currentState!.validate()) {
       _tabController.animateTo(0);
       return;
     }
-    if (_items.isEmpty) {
-      _tabController.animateTo(1);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Add at least one item")));
-      return;
-    }
 
-    // Make sure last tab is saved before final submission
+
     _saveTabByIndex(_tabController.index);
 
     setState(() => _isSubmitting = true);
@@ -1133,21 +979,27 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       if (resp.statusCode == 200 || resp.statusCode == 201) {
         final body = json.decode(resp.body);
         final name = body['data']['name'];
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Purchase Order created: ${name ?? 'Success'}")));
-        // clear saved storage and in-memory forms after successful submit
+        ToastUtils.show(context,"Purchase Order created: ${name ?? 'Success'}");
+
         await box.remove('po_saved_details');
         await box.remove('po_saved_items');
         await box.remove('po_saved_taxes');
-        await box.remove('po_saved_terms');
-        await box.remove('po_saved_attachments');
-        Navigator.pop(context, true);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PurchaseOrderListScreen(refresh: true),
+          ),
+        );
       } else {
-        debugPrint("Create PO failed: ${resp.statusCode} ${resp.body}");
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to create PO (${resp.statusCode})")));
+
+        ToastUtils.show(context,"Failed to create PO (${resp.statusCode})");
+
       }
     } catch (e) {
-      debugPrint("Create PO error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error creating PO: $e")));
+
+      ToastUtils.show(context,"Error creating PO: $e");
+
     } finally {
       setState(() => _isSubmitting = false);
     }
@@ -1334,11 +1186,14 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
 
   double get _subTotal => _items.fold(0.0, (s, it) => s + (it.qty * it.rate));
   double get _taxTotal {
-    double t = 0;
-    // for (final tax in _taxes) {
-    //   t += _subTotal * (tax.rate / 100.0);
-    // }
-    return t;
+    double total = 0;
+    for (final tax in _taxes) {
+      // Calculate tax amount based on current subtotal or grand total
+      total += _subTotal * (tax.rate / 100.0);
+      // Also update the individual tax amount in TaxLine if you want
+      tax.amount = _subTotal * (tax.rate / 100.0);
+    }
+    return total;
   }
 
   double get _grandTotal => _subTotal + _taxTotal;
@@ -1368,8 +1223,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
             Tab(text: "Details"),
             Tab(text: "Items"),
             Tab(text: "Taxes"),
-            Tab(text: "Terms"),
-            Tab(text: "Attachment"),
+
 
 
           ],
@@ -1422,6 +1276,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
                       if (v != null && v.isNotEmpty) {
                         await _fetchSupplierName(v);
                         _markUnsaved(0);
+                        _addTaxForSupplier(v);
                       }
                     },
                     loading: _loadingSuppliers,
@@ -1523,65 +1378,137 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
 
                   const SizedBox(height: 20),
 
+
                   SizedBox(
-                    width: double.infinity, // full width
+                    width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       onPressed: () async {
-                        final shouldSave = await showDialog<bool>(
-                          context: context,
-                          barrierDismissible: false, // user must choose Yes/No
-                          builder: (context) => AlertDialog(
-                            title: const Text("Confirm Save"),
-                            content: const Text("Do you want to save details before proceeding?"),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, false), // No
-                                child: const Text("No"),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(context, true), // Yes
-                                child: const Text("Yes"),
-                              ),
-                            ],
-                          ),
-                        );
+                        _saveDetailsTab();
+                        _saveItemsTab();
+                        _saveTaxesTab();
+                        print(_savedForm);
+                        List<String> missingFields = [];
 
-                        if (shouldSave == true) {
-                          await _saveDetailsTab; // ✅ call the function (you missed parentheses earlier)
+                        List<String> requiredFields = [
+                          "supplier",
+                          "naming_series",
+                          "purchase_type",
+                          "purchase_person",
+                          "po_approver",
+                          "currency",
+                          "project",
+                          "warehouse",
+                          "company",
+                          "items",
+                        ];
+
+
+                        for (var field in requiredFields) {
+                          if (((_savedForm['details'][field] is String) && _savedForm['details'][field].isEmpty) ||
+                              (_savedForm[field] is List && _savedForm[field].isEmpty)) {
+                            // Add a readable label if you want (capitalize words or map)
+                            missingFields.add(field.replaceAll('_', ' ').split(' ').map((w) => "${w[0].toUpperCase()}${w.substring(1)}").join(' '));
+                          }
                         }
 
-                        // ✅ Navigate to next tab in both cases
-                        _tabController.animateTo(1);
-                      },
-                      icon: const Icon(Icons.arrow_forward),
-                      label: const Text("Save"),
-                    ),
-                  ),
-                  SizedBox(
-                    width: double.infinity, // full width
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      onPressed: () async {
+                        // Add more checks for other mandatory fields as needed
+
+                        if (missingFields.isNotEmpty) {
+                          // Show error dialog
+                          await showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 5,
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.error_outline, size: 50, color: Colors.red),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        "Mandatory Fields Missing",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        "Please fill the following fields:",
+                                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // List of missing fields
+                                      ...missingFields.map((f) => Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 2),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.circle, size: 8, color: Colors.redAccent),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                f,
+                                                style: TextStyle(fontSize: 16, color: Colors.black87),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+                                      const SizedBox(height: 20),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.grey,
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                          ),
+                                          onPressed: () => Navigator.pop(context),
+                                          child: const Text(
+                                            "OK",
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                          return; // stop further execution
+                        }
+
+
                         final shouldSave = await showDialog<bool>(
                           context: context,
-                          barrierDismissible: false, // user must choose Yes/No
+                          barrierDismissible: false,
                           builder: (context) => AlertDialog(
                             title: const Text("Confirm Create"),
                             content: const Text("Do you want to Create Purchase Order?"),
                             actions: [
                               TextButton(
-                                onPressed: () => Navigator.pop(context, false), // No
+                                onPressed: () => Navigator.pop(context, false),
                                 child: const Text("No"),
                               ),
                               TextButton(
-                                onPressed: () => Navigator.pop(context, true), // Yes
+                                onPressed: () => Navigator.pop(context, true),
                                 child: const Text("Yes"),
                               ),
                             ],
@@ -1589,16 +1516,13 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
                         );
 
                         if (shouldSave == true) {
-                          await _submit(); // ✅ call the function (you missed parentheses earlier)
+                          await _submit();
                         }
-
-
                       },
-                      icon: const Icon(Icons.arrow_forward),
                       label: const Text("Create"),
-
                     ),
                   ),
+
 
 
                 ],
@@ -1615,7 +1539,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
                   children: [
                     ElevatedButton.icon(onPressed: () => _showAddEditItemDialog(), icon: const Icon(Icons.add), label: const Text("Add Item")),
                     const SizedBox(width: 12),
-                    ElevatedButton.icon(onPressed: _items.isNotEmpty ? () => _tabController.animateTo(2) : null, icon: const Icon(Icons.check), label: const Text("Done")),
+
                     const Spacer(),
                     Text("Sub Total: ${_subTotal.toStringAsFixed(2)}"),
                   ],
@@ -1662,129 +1586,60 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
           ),
 
           // ---------------- TAXES TAB ----------------
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    ElevatedButton.icon(onPressed: _addTaxLine, icon: const Icon(Icons.add), label: const Text("Add Tax")),
-                    const Spacer(),
-                    Text("Tax Total: ${_taxTotal.toStringAsFixed(2)}"),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Expanded(
-                //   child: _taxes.isEmpty
-                //       ? const Center(child: Text("No tax lines"))
-                //       : ListView.builder(
-                //     itemCount: _taxes.length,
-                //     itemBuilder: (ctx, i) {
-                //       final t = _taxes[i];
-                //       return ListTile(
-                //         title: Text(t.description.isNotEmpty ? t.description : "Tax ${i + 1}"),
-                //         subtitle: Text("Rate: ${t.rate}%"),
-                //         trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.redAccent), onPressed: () {
-                //           setState(() {
-                //             _taxes.removeAt(i);
-                //             _markUnsaved(2);
-                //           });
-                //         }),
-                //       );
-                //     },
-                //   ),
-                // ),
-                Row(
-                  children: [
-                    ElevatedButton(onPressed: _saveTaxesTab, child: const Text("Save Taxes")),
-                    const SizedBox(width: 12),
-                    OutlinedButton(onPressed: () async {
-                      final ok = await _confirmSaveDiscardIfUnsaved(2);
-                      if (ok) _tabController.animateTo(3);
-                    }, child: const Text("Go to Terms")),
-                    const Spacer(),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                  Padding(
+    padding: const EdgeInsets.all(12.0),
+    child: Column(
+    children: [
+    Row(
+    children: [
 
-          // ---------------- TERMS TAB ----------------
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                ElevatedButton.icon(onPressed: _addTerm, icon: const Icon(Icons.add), label: const Text("Add Term")),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: _terms.isEmpty
-                      ? const Center(child: Text("No terms added"))
-                      : ListView.builder(
-                    itemCount: _terms.length,
-                    itemBuilder: (ctx, i) {
-                      return ListTile(
-                        title: Text(_terms[i]),
-                        trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.redAccent), onPressed: () {
-                          setState(() {
-                            _terms.removeAt(i);
-                            _markUnsaved(3);
-                          });
-                        }),
-                      );
-                    },
-                  ),
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(onPressed: _saveTermsTab, child: const Text("Save Terms")),
-                    const SizedBox(width: 12),
-                    OutlinedButton(onPressed: () async {
-                      final ok = await _confirmSaveDiscardIfUnsaved(3);
-                      if (ok) _tabController.animateTo(4);
-                    }, child: const Text("Go to Attachments")),
-                    const Spacer(),
-                  ],
-                ),
-              ],
-            ),
-          ),
+    const Spacer(),
+    Text(
+    "Tax Total: ${_taxTotal.toStringAsFixed(2)}",
+    style: const TextStyle(fontWeight: FontWeight.bold),
+    ),
+    ],
+    ),
+    const SizedBox(height: 12),
 
-          // ---------------- ATTACHMENTS TAB ----------------
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // placeholder: implement file picker & upload
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("File upload not implemented in this sample")));
-                  },
-                  icon: const Icon(Icons.attach_file),
-                  label: const Text("Add Attachment"),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: _attachments.isEmpty ? const Center(child: Text("No attachments")) : ListView.builder(
-                    itemCount: _attachments.length,
-                    itemBuilder: (ctx, i) => ListTile(title: Text(_attachments[i])),
-                  ),
-                ),
-                Row(
-                  children: [
-                    ElevatedButton(onPressed: _saveAttachmentsTab, child: const Text("Save Attachments")),
-                    const SizedBox(width: 12),
-                    OutlinedButton(onPressed: () async {
-                      final ok = await _confirmSaveDiscardIfUnsaved(4);
-                      if (ok) _tabController.animateTo(0);
-                    }, child: const Text("Back to Details")),
-                    const Spacer(),
-                       ],
-                ),
-              ],
+    // Display tax lines as cards
+      ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _taxes.length,
+        itemBuilder: (context, index) {
+          final tax = _taxes[index];
+          final amount = _subTotal * (tax.rate / 100); // calculate tax amount
+
+          return Card(
+            elevation: 3,
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-          ),
-        ],
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              title: Text(
+                tax.description,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(
+                "Amount: ₹${amount.toStringAsFixed(2)}", // show calculated amount
+                style: const TextStyle(fontWeight: FontWeight.w400),
+              ),
+              trailing: Text(
+                "${tax.rate.toStringAsFixed(2)}%",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          );
+        },
       ),
+
+    ],
+    ),
+    )],
+    ),
 
     );
   }
@@ -1818,3 +1673,16 @@ class PurchaseOrderItem {
   };
 }
 
+class TaxLine {
+  String description;
+  double rate;
+  double amount;       // calculated tax amount
+  bool supplierTax;    // indicates if tax is from supplier
+
+  TaxLine({
+    required this.description,
+    required this.rate,
+    this.amount = 0.0,           // default 0
+    this.supplierTax = false,    // default false for manually added taxes
+  });
+}

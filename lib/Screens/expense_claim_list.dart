@@ -44,19 +44,19 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
   /// Fetch Expense Types for dropdown
   Future<void> fetchExpenseTypes() async {
     try {
-      final sid = box.read(SID);
+
       final url = Uri.parse(
           "$GetMasterList?doctype=Expense Claim Type&search_text=");
 
       final response = await http.get(url, headers: headers);
       final data = jsonDecode(response.body);
-      if (data["data"] != null) {
+      if (data is Map && data.containsKey("data")) {
         setState(() {
           expenseTypes = List<String>.from(data["data"]);
         });
       }
     } catch (e) {
-      debugPrint("Error fetching expense types: $e");
+      print("Error fetching expense types: $e");
     }
   }
 
@@ -79,8 +79,8 @@ class _ExpenseClaimScreenState extends State<ExpenseClaimScreen> {
         dateFormat.format(lastDay),
         0,
       );
-
-      if (res?['data'] != null) {
+      print(res);
+      if (res is Map && res.containsKey('data') && res['data'] != null) {
         final seen = <String>{};
         final List<dynamic> temp = [];
 

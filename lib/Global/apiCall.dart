@@ -449,15 +449,19 @@ Future<Map<String, dynamic>?> apiHolidayList() async {
 Future<dynamic> apiExpenseClaimList(
     String fromDate, String toDate, int start) async {
   final String EmployeeCode = box.read('employee_code');
-  final sid = box.read(SID);
+  print(EmployeeCode);
+  print(headers);
+
   String baseUrl =
       "$GetExpenseClaims?employee_code=$EmployeeCode&from_date=$fromDate&to_date=$toDate";
 
-  final response = await http.get(Uri.parse(baseUrl), headers: {'Cookie': 'sid=$sid'});
+  final response = await http.get(Uri.parse(baseUrl), headers: headers);
   final statusCode = response.statusCode;
+  print(statusCode);
 
   if (statusCode == 200) {
     final res = jsonDecode(response.body);
+    print(res);
     return res;
   } else {
     return _handleFailResponse(response);
