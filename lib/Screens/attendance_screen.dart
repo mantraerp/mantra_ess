@@ -46,7 +46,7 @@ class AttendanceScreen extends StatelessWidget {
   }
 
   // Summary card widget with tap for filtering
-  Widget summaryCard(String title, int count, Color bgColor, Color textColor,
+  Widget summaryCard(String title, String count, Color bgColor, Color textColor,
       VoidCallback onTap,
       {String? extraText}) {
     return Flexible(
@@ -325,24 +325,25 @@ class AttendanceScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  summaryCard('Present', summary['Present'] ?? 0,
+                  summaryCard('Present', summary['Present'] ?? '0',
                       Colors.green.shade100, Colors.green.shade800, () {
                         controller.filterStatus.value = 'Present';
                       }),
-                  summaryCard('Absent', summary['Absent'] ?? 0, Colors.red.shade100,
+                  summaryCard('Absent', summary['Absent'] ?? '0', Colors.red.shade100,
+
                       Colors.red.shade800, () {
                         controller.filterStatus.value = 'Absent';
                       }),
-                  summaryCard('On Leave', summary['On Leave'] ?? 0, Colors.blue.shade100,
+                  summaryCard('On Leave', summary['On Leave'] ?? '0', Colors.blue.shade100,
                       Colors.blue.shade800, () {
                         controller.filterStatus.value = 'On Leave';
                       }),
 
-                  summaryCard('Week Off', summary['Week-Off'] ?? 0, Colors.orange.shade100,
+                  summaryCard('Week Off', summary['Week-Off'] ?? '0', Colors.orange.shade100,
                       Colors.orange.shade800, () {
                         controller.filterStatus.value = 'Week-off';
                       }),
-                  summaryCard('Total', summary['Total Days'] ?? 0, Colors.grey.shade300,
+                  summaryCard('Total', summary['Total Days'] ?? '0', Colors.grey.shade300,
                       Colors.black87, () {
                         controller.filterStatus.value = 'All';
                       }),

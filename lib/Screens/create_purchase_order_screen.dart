@@ -901,6 +901,8 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       "currency": _selectedCurrency,
       "company": _selectedCompany,
       "items": itemsPayload,
+      "project":_selectedProject,
+      "warehouse":_selectedWarehouse
       // // "taxes": taxesPayload,
       // "terms": _terms,
       // // attachments not implemented in this example; you can add file ids if uploaded
@@ -914,7 +916,7 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
       final encodedSupplier = Uri.encodeComponent(supplierName);
 
       final url = Uri.parse(
-          'http://192.168.11.66:8014/api/method/erp_mobile.api.masterdata.get_party_info'
+          '$GetPartyInfo'
               '?party=$encodedSupplier'
               '&party_type=Supplier'
               '&doctype=Purchase Order'
@@ -1408,12 +1410,31 @@ class _CreatePurchaseOrderScreenState extends State<CreatePurchaseOrderScreen>
 
 
                         for (var field in requiredFields) {
-                          if (((_savedForm['details'][field] is String) && _savedForm['details'][field].isEmpty) ||
-                              (_savedForm[field] is List && _savedForm[field].isEmpty)) {
-                            // Add a readable label if you want (capitalize words or map)
-                            missingFields.add(field.replaceAll('_', ' ').split(' ').map((w) => "${w[0].toUpperCase()}${w.substring(1)}").join(' '));
+                          dynamic value;
+
+                          // Items is at root, all others are inside details
+                          if (field == "items") {
+                            value = _savedForm[field];
+                          } else {
+                            value = _savedForm['details'][field];
+                          }
+
+                          // Now check empty/null value
+                          if ((value is String && value.isEmpty) ||
+                              (value is List && value.isEmpty) ||
+                              value == null) {
+
+                            missingFields.add(
+                                field
+                                    .replaceAll('_', ' ')
+                                    .split(' ')
+                                    .map((w) => "${w[0].toUpperCase()}${w.substring(1)}")
+                                    .join(' ')
+                            );
                           }
                         }
+
+
 
                         // Add more checks for other mandatory fields as needed
 

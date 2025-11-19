@@ -70,7 +70,7 @@ class _ItemDetailScreenScreenState extends State<ItemDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.ItemCode),
-        elevation: 1,
+
         centerTitle: true,
       ),
       body: _isLoading

@@ -48,7 +48,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     toDate = DateFormat('yyyy-MM-dd').format(now);
 
     _fetchStatusOptions();
-    _fetchPurchaseOrders(isRefresh: widget.refresh);
+    _fetchPurchaseOrders(isRefresh: widget.refresh ? widget.refresh : true);
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=

@@ -59,7 +59,7 @@ class _ItemListPageState extends State<ItemListPage> {
       appBar: AppBar(
         title: const Text(
           'Item List',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
         ),
         centerTitle: true,
         bottom: PreferredSize(
@@ -91,6 +91,8 @@ class _ItemListPageState extends State<ItemListPage> {
                   children: [
                     const Text('Disabled', style: TextStyle(fontSize: 14)),
                     Checkbox(
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
                       value: isDisabled,
                       onChanged: (bool? newValue) {
                         setState(() {

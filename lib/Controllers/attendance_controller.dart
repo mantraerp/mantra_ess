@@ -7,7 +7,7 @@ class AttendanceController extends GetxController {
   // 🔹 Reactive variables
   RxList<AttendanceRecord> attendanceList = <AttendanceRecord>[].obs;
   RxBool isLoading = false.obs;
-  RxMap<String, int> attendance_count = <String, int>{}.obs;
+  RxMap<String, String> attendance_count = <String, String>{}.obs;
 
   // 🔹 Last month as default
   DateTime defaultFromDate =
@@ -50,16 +50,18 @@ class AttendanceController extends GetxController {
         // Attendance data
         attendanceList.value = res.data;
 
+
+
         // ✅ Handle summary safely
         if (res.attendance_count != null && res.attendance_count!.isNotEmpty) {
           attendance_count.value = {
-            'Present': res.attendance_count!['Present'] ?? 0,
-            'Absent': res.attendance_count!['Absent'] ?? 0,
-            'On Leave': res.attendance_count!['On Leave'] ?? 0,
-            'Half Day': res.attendance_count!['Half Day'] ?? 0,
-            'Week-Off': res.attendance_count!['Week-off'] ?? 0,
-            'Holiday': res.attendance_count!['Holiday'] ?? 0,
-            'Total Days': res.attendance_count!['Total Days'] ?? 0,
+            'Present': res.attendance_count!['Present'] ?? '0',
+            'Absent': res.attendance_count!['Absent'] ?? '0',
+            'On Leave': res.attendance_count!['On Leave'] ?? '0',
+            'Half Day': res.attendance_count!['Half Day'] ?? '0',
+            'Week-Off': res.attendance_count!['Week-off'] ?? '0',
+            'Holiday': res.attendance_count!['Holiday'] ?? '0',
+            'Total Days': res.attendance_count!['Total Days'] ?? '0',
           };
         } else {
           attendance_count.clear();
