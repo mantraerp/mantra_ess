@@ -342,6 +342,7 @@ class _MaterialRequestListScreenState extends State<MaterialRequestScreenListScr
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Title:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(

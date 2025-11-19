@@ -208,19 +208,32 @@ class _MaterialRequestDetailScreenState extends State<MaterialRequestDetailScree
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w500)),
+          // LABEL
           Text(
-            value ?? "-",
+            "$label: ",
             style: const TextStyle(
+              fontSize: 13,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          // VALUE (auto-wrap)
+          Expanded(
+            child: Text(
+              value ?? "-",
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87),
+                color: Colors.black87,
+              ),
+              softWrap: true,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.visible,
+              maxLines: null,
+            ),
           ),
         ],
       ),

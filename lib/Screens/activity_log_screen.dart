@@ -113,7 +113,7 @@ class _BaseActivityScreenState extends State<BaseActivityScreen> {
                           "(${_activityLogs.length})",
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Colors.deepOrange,
+                            color: Colors.black,
                             fontWeight: FontWeight.w600,
                           ),
                         ),

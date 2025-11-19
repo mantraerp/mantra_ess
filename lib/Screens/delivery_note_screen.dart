@@ -325,7 +325,9 @@ class _DeliveryNoteListScreenState extends State<DeliveryNoteListScreen> {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,   // ← space between
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Customer:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(

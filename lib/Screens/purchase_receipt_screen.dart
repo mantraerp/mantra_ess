@@ -327,13 +327,14 @@ class _PurchaseOrderListScreenState extends State<PurchaseReceiptListScreen> {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,   // ← space between
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Supplier:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(
                             child: Text(
                               dn.supplier_name ?? "-",
-                              textAlign: TextAlign.end,
+                              textAlign: TextAlign.right,
                               style: const TextStyle(
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black87),

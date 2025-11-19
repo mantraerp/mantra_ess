@@ -68,7 +68,7 @@ class _SalarySlipListState extends State<SalarySlipList> {
             fontSize: 18,
           ),
         ),
-        iconTheme: const IconThemeData(color: appBlack),
+
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),

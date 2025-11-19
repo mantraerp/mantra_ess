@@ -47,7 +47,7 @@ class PolicyListState extends State<Policylist> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Policies'
+            'Policies'
         ),
         // flexibleSpace: Container(
         //   decoration: const BoxDecoration(
@@ -84,9 +84,8 @@ class PolicyListState extends State<Policylist> {
           itemCount: listData.length,
           itemBuilder: (context, index) {
             final policy = listData[index];
-            final policyCode = policy['name'] ?? 'Untitled Policy';
-            final policyName = policy['policy_name'] ?? 'N/A';
-            final company = policy['insurance_company'] ?? 'N/A';
+            final policyName = policy['title'] ?? 'N/A';
+            final policyDetails = policy['details'] ?? 'No Details Found';
 
             return GestureDetector(
               onTap: () {
@@ -94,7 +93,7 @@ class PolicyListState extends State<Policylist> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        PolicyDetailsPage(policyName: policy['name']),
+                        PolicyDetailsPage(policyName: policy['name'], policyDetails : policy['detail']),
                   ),
                 );
               },
@@ -107,14 +106,7 @@ class PolicyListState extends State<Policylist> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white,
-                        Colors.blue.shade50.withOpacity(0.5)
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -132,42 +124,48 @@ class PolicyListState extends State<Policylist> {
                             Icons.policy,
                             color: Colors.blueAccent,
                             size: 28,
+
                           ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
+
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                policyName,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                              Padding(
+                                padding: const EdgeInsets.only(top: 11),
+                                child: Text(
+                                  policyName,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
+
                               const SizedBox(height: 4),
-                              Text(
-                                'Policy Code: $policyCode',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Insurance Company: $company',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
+                              // Text(
+                              //   'Policy Code: $policyCode',
+                              //   style: const TextStyle(
+                              //     fontSize: 14,
+                              //     color: Colors.black54,
+                              //   ),
+                              // ),
+                              // const SizedBox(height: 4),
+                              // Text(
+                              //   'Insurance Company: $company',
+                              //   style: const TextStyle(
+                              //     fontSize: 14,
+                              //     color: Colors.black54,
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _buildStatusTag(policy),
+                        // _buildStatusTag(policy),
                       ],
                     ),
                   ),

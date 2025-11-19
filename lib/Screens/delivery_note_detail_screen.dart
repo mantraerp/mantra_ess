@@ -15,10 +15,10 @@ class DeliveryNoteDetailScreen extends StatefulWidget {
 
   @override
   State<DeliveryNoteDetailScreen> createState() =>
-      _SalesInvoiceDetailScreenState();
+      _DeliveryNoteDetailScreenState();
 }
 
-class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
+class _DeliveryNoteDetailScreenState extends State<DeliveryNoteDetailScreen> {
   final box = GetStorage();
   bool _isLoading = true;
   bool _hasError = false;
@@ -33,7 +33,7 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchSalesInvoiceDetail();
+    _fetchDeliveryNoteDetail();
   }
 
   Future<void> _fetchActivityLog() async {
@@ -63,7 +63,7 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
     }
   }
 
-  Future<void> _fetchSalesInvoiceDetail() async {
+  Future<void> _fetchDeliveryNoteDetail() async {
     setState(() {
       _isLoading = true;
       _hasError = false;
@@ -140,7 +140,9 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
             // ====== Header Info ======
+
             Container(
               decoration: BoxDecoration(
                 color: Colors.blueGrey.shade50,
@@ -151,7 +153,26 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _infoRow("Customer ID", poDetail?['customer']),
                   _infoRow("Customer", poDetail?['customer_name']),
+
+                ],
+              ),
+
+
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.blueGrey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
                   _infoRow(
                       "Transaction Date",
                       poDetail?['posting_date'] ?? "-"),
@@ -161,7 +182,10 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
                       "${poDetail?['grand_total'] ?? '0.0'} ${poDetail?['currency'] ?? ''}"),
                 ],
               ),
+
+
             ),
+
             const SizedBox(height: 20),
 
             // ====== Navigation Cards ======
@@ -214,10 +238,6 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
               docname:  widget.deliveryNoteName,
             ),
 
-
-
-
-
           ],
         ),
       ),
@@ -228,20 +248,38 @@ class _SalesInvoiceDetailScreenState extends State<DeliveryNoteDetailScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+          // LABEL
           Text(
-            value ?? "-",
+            "$label: ",
             style: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+              fontSize: 13,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          // VALUE (auto-wrap)
+          Expanded(
+            child: Text(
+              value ?? "-",
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              softWrap: true,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.visible,
+              maxLines: null,
+            ),
           ),
         ],
       ),
     );
   }
+
 
   Widget _navCard(
       BuildContext context, {
