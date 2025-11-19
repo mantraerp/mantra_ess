@@ -153,7 +153,24 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _infoRow("Supplier ID", poDetail?['supplier']),
                   _infoRow("Supplier", poDetail?['supplier_name']),
+
+                ],
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.blueGrey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
                   _infoRow("Transaction Date",
                       poDetail?['transaction_date'] ?? "-"),
                   _infoRow("Status", poDetail?['status']),
@@ -217,33 +234,43 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 docname:  widget.purchaseOrderName,
               ),
 
-
-
-
-
           ],
         ),
       ),
     );
   }
 
+
   Widget _infoRow(String label, String? value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w500)),
+          // LABEL
           Text(
-            value ?? "-",
+            "$label: ",
             style: const TextStyle(
+              fontSize: 13,
+              color: Colors.grey,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+
+          // VALUE (auto-wrap)
+          Expanded(
+            child: Text(
+              value ?? "-",
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87),
+                color: Colors.black87,
+              ),
+              softWrap: true,
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.visible,
+              maxLines: null,
+            ),
           ),
         ],
       ),

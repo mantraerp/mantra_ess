@@ -59,7 +59,7 @@ class _ItemListPageState extends State<ItemListPage> {
       appBar: AppBar(
         title: const Text(
           'Item List',
-          style: TextStyle(fontWeight: FontWeight.bold),
+
         ),
         centerTitle: true,
         bottom: PreferredSize(
@@ -91,6 +91,8 @@ class _ItemListPageState extends State<ItemListPage> {
                   children: [
                     const Text('Disabled', style: TextStyle(fontSize: 14)),
                     Checkbox(
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
                       value: isDisabled,
                       onChanged: (bool? newValue) {
                         setState(() {
@@ -180,14 +182,7 @@ class _ItemListPageState extends State<ItemListPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white,
-                        Colors.blue.shade50.withOpacity(0.5)
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -202,7 +197,7 @@ class _ItemListPageState extends State<ItemListPage> {
                             color: Colors.blueAccent.withOpacity(0.2),
                           ),
                           child: const Icon(
-                            Icons.policy,
+                            Icons.inventory_2,
                             color: Colors.blueAccent,
                             size: 28,
                           ),
@@ -279,7 +274,7 @@ class _ItemListPageState extends State<ItemListPage> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: bgColor),
+
           const SizedBox(width: 4),
           Text(
             statusText,

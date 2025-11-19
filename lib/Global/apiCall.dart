@@ -232,6 +232,7 @@ Future<dynamic> apiGetAttendance(String fromDate, String toDate) async {
 
   if (statusCode == 200) {
     final AttendanceResponse res = attendanceResponseFromJson(response.body);
+
     return res;
   } else {
     return _handleFailResponse(response);
@@ -318,10 +319,10 @@ Future<dynamic> apiGetSalesOrders(String fromDate, String toDate, int start) asy
 //Get SerialNumber Api
 Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
   String url =
-      "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.track_serial_number?serial_no=$serialNumber";
+      "$GetSerialTrackDetails?serial_no=$serialNumber";
 
   // final response = await http.post(Uri.parse(url),headers:headers);
-  final sid = box.read(SID);
+
   final response = await http.get(Uri.parse(url),headers: headers);
 
   int statusCode = response.statusCode;
@@ -337,7 +338,7 @@ Future<dynamic> apiTrackSerialNumber(String serialNumber) async {
 //Get Batch Number
 Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
   String url =
-      "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.track_batch_details?batch_no=$batchNumber";
+      "$GetTrackDetails?batch_no=$batchNumber";
 
   // final response = await http.post(Uri.parse(url),headers:headers);
   final sid = box.read(SID);
@@ -357,7 +358,7 @@ Future<dynamic> apiTrackBatchNumber(String batchNumber) async {
 Future<String?> apiCheckSerialOrBatchType(String number) async {
   try {
     String url =
-        "http://192.168.11.66:8014/api/method/erp_mobile.api.serial_no.check_serial_or_batch?number=$number";
+        "$GetSerialorBatchNumber?number=$number";
 
     final sid = box.read(SID);
     final response = await http.get(Uri.parse(url),headers: headers);
@@ -387,9 +388,7 @@ Future<String?> apiCheckSerialOrBatchType(String number) async {
 //Policy List API
 Future<Map<String, dynamic>?> apiPolicyList() async {
   try {
-    String url = "http://192.168.11.66:8014/api/method/erp_mobile.api.policy.get_policies";
-
-    final sid = box.read(SID);
+    String url = "$GetPolicy";
     final response = await http.get(Uri.parse(url),headers:headers);
 
     if (response.statusCode == 200) {
@@ -407,7 +406,7 @@ Future<Map<String, dynamic>?> apiPolicyList() async {
 Future<Map<String, dynamic>> apifetchPolicyDetails(String policyName) async {
   try{
     String url =
-        "http://192.168.11.66:8014/api/method/erp_mobile.api.policy.get_policy_details?policy=$policyName";
+        "$GetPolicyDetails?policy=$policyName";
 
     // final response = await http.post(Uri.parse(url),headers:headers);
     final sid = box.read(SID);
@@ -430,9 +429,9 @@ Future<Map<String, dynamic>> apifetchPolicyDetails(String policyName) async {
 Future<Map<String, dynamic>?> apiHolidayList() async {
   final String EmployeeCode = box.read('employee_code');
   try {
-    String url = "http://192.168.11.66:8014/api/method/erp_mobile.api.holiday.get_holidays?employee_code=$EmployeeCode";
+    String url = "$GetHoliday?employee_code=$EmployeeCode";
 
-    final sid = box.read(SID);
+
     final response = await http.get(Uri.parse(url),headers: headers);
 
     if (response.statusCode == 200) {

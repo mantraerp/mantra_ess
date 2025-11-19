@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mantra_ess/Controllers/dashboard_controller.dart';
 import 'package:mantra_ess/Global/apiCall.dart';
+import 'package:flutter/services.dart';
 import 'package:mantra_ess/SalarySlip/salaryslip_list.dart';
 import 'package:mantra_ess/Screens/attendance_screen.dart';
 import 'package:mantra_ess/Screens/profile_screen.dart';
@@ -44,7 +45,12 @@ class _dashboardState extends State<dashboard> {
     return GetBuilder<DashboardController>(
       init: DashboardController(),
       builder: (controller) {
-        return Scaffold(
+        return WillPopScope(
+            onWillPop: () async {
+              SystemNavigator.pop();   // <-- closes the app
+              return false;            // prevents navigating back to login
+            },
+            child: Scaffold(
           appBar: AppBar(
             title: Text('Dashboard'),
             leading: Container(),
@@ -184,6 +190,7 @@ class _dashboardState extends State<dashboard> {
             ),
           )
               : Center(child: Text('No data')),
+            )
         );
       },
     );

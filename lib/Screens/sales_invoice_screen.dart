@@ -341,6 +341,7 @@ class _SalesInvoiceListScreenState extends State<SalesInvoiceListScreen> {
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Customer:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(

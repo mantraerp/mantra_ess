@@ -48,7 +48,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     toDate = DateFormat('yyyy-MM-dd').format(now);
 
     _fetchStatusOptions();
-    _fetchPurchaseOrders(isRefresh: widget.refresh);
+    _fetchPurchaseOrders(isRefresh: widget.refresh ? widget.refresh : true);
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
@@ -361,13 +361,14 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,   // ← space between
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Supplier:", style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                           Expanded(
                             child: Text(
                               dn.supplier_name ?? "-",
-                              textAlign: TextAlign.end,
+                              textAlign: TextAlign.right,
                               style: const TextStyle(
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black87),

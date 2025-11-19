@@ -54,6 +54,11 @@ const String GetPurchaseOrders =
 const String CreatePurchaseOrder =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.create_purchase_order";
 
+const String GetPartyInfo =
+    SUB_BASE_URL + "erp_mobile.api.purchase_order.get_party_info";
+
+const String GetHoliday =
+    SUB_BASE_URL + "erp_mobile.api.holiday.get_holidays";
 const String GetPurchaseOrderStatus =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.get_po_status";
 
@@ -206,3 +211,20 @@ const String GetPoNamingSeries =
 
 const String GetPartyName =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.get_party_name";
+
+
+const String GetPolicyDetails =
+    SUB_BASE_URL + "erp_mobile.api.policy.get_policy_details";
+
+
+const String GetPolicy =
+    SUB_BASE_URL + "erp_mobile.api.policy.get_policies";
+
+const String GetSerialorBatchNumber =
+    SUB_BASE_URL + "erp_mobile.api.serial_no.check_serial_or_batch";
+
+const String GetTrackDetails =
+    SUB_BASE_URL + "erp_mobile.api.serial_no.track_batch_details";
+
+const String GetSerialTrackDetails =
+    SUB_BASE_URL + "erp_mobile.api.serial_no.track_serial_number";

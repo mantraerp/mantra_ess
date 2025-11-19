@@ -32,7 +32,6 @@ class _ItemDetailScreenScreenState extends State<ItemDetailScreen> {
     });
 
     try {
-      final sid = box.read('SID');
       final url = Uri.parse("$GetItemAndStockDetail?item_code=${widget.ItemCode}");
       final response = await http.get(url, headers: headers);
 
@@ -70,7 +69,7 @@ class _ItemDetailScreenScreenState extends State<ItemDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.ItemCode),
-        elevation: 1,
+
         centerTitle: true,
       ),
       body: _isLoading
@@ -114,7 +113,7 @@ class _ItemDetailScreenScreenState extends State<ItemDetailScreen> {
               icon: Icons.inventory_2_rounded,
               color: Colors.teal,
               onTap: () {
-                if ( StockDetails != null && StockDetails.isNotEmpty) {
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -125,7 +124,7 @@ class _ItemDetailScreenScreenState extends State<ItemDetailScreen> {
                     ),
                   );
                 }
-              },
+
             ),
             // ====== Collapsible Activity Log ======
             const SizedBox(height: 20),
@@ -141,15 +140,32 @@ Widget _infoRow(String label, String? value) {
   return Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+        // LABEL
         Text(
-          value ?? "-",
+          "$label: ",
           style: const TextStyle(
-              fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+            fontSize: 13,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+
+        // VALUE (auto-wrap)
+        Expanded(
+          child: Text(
+            value ?? "-",
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            softWrap: true,
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.visible,
+            maxLines: null,
+          ),
         ),
       ],
     ),
@@ -169,11 +185,7 @@ Widget _navCard(
     child: Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.15), Colors.white],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(

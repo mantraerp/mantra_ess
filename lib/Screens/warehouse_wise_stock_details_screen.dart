@@ -13,19 +13,19 @@ class WarehouseStock extends StatelessWidget {
     final StockDetails = stock_details ?? [];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+
       appBar: AppBar(
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+
       ),
       body: StockDetails.isEmpty
           ? const Center(
         child: Text(
-          "No Details found",
+          "No Stock Details found",
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
       )

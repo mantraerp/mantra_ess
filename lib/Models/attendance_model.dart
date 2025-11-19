@@ -10,7 +10,7 @@ class AttendanceResponse {
   String message;
   List<AttendanceRecord> data;
   int statusCode;
-  Map<String, int> attendance_count; // ✅ Added field
+  Map<String, String> attendance_count; // ✅ Added field
 
   AttendanceResponse({
     required this.message,
@@ -22,11 +22,11 @@ class AttendanceResponse {
   factory AttendanceResponse.fromJson(Map<String, dynamic> json) {
     // Some APIs might not return "summary"
     final summaryData = json["attendance_count"];
-    Map<String, int> summaryMap = {};
+    Map<String, String> summaryMap = {};
 
     if (summaryData != null && summaryData is Map<String, dynamic>) {
       summaryData.forEach((key, value) {
-        summaryMap[key] = int.tryParse(value.toString()) ?? 0;
+        summaryMap[key] = value.toString() ?? '0';
       });
     }
 
