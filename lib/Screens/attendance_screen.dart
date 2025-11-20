@@ -9,41 +9,95 @@ class AttendanceScreen extends StatelessWidget {
 
   AttendanceScreen({super.key});
 
-  // Status background color with leave check
-  Color getStatusColor(String? status, [String? leaveType]) {
-    if (leaveType != null && leaveType.isNotEmpty) return Colors.blue.shade100;
-    switch (status?.toUpperCase() ?? '') {
-      case 'P':
-        return Colors.green.shade100;
-      case 'A':
-        return Colors.red.shade100;
-      case 'W':
-        return Colors.orange.shade100;
-      case 'H':
-        return Colors.lightBlue.shade100;
 
-      default:
-        return Colors.grey.shade200;
+  Color getStatusColor(String? ms, String? status, String? leaveType) {
+    ms = ms ?? "";
+    status = status ?? "";
+    leaveType = leaveType ?? "";
+
+
+    if (leaveType == "Leave Without Pay") {
+      return Colors.red.shade100;
     }
+
+
+    if (leaveType.isNotEmpty) {
+      return Colors.blue.shade100;
+    }
+
+
+    if (["W", "WH"].contains(ms)) {
+      return Colors.orange.shade100;
+    }
+
+
+    if (["H", "HW"].contains(ms)) {
+      return Colors.lightBlue.shade100;
+    }
+
+
+    if (ms == "HD" || status == "Half Day") {
+      return Colors.yellow.shade200;
+    }
+
+
+    if (["P", "PW", "PH", "WH", "HW"].contains(ms)) {
+      return Colors.green.shade100;
+    }
+
+
+    if (["A", "XX", "LH", "E"].contains(ms)) {
+      return Colors.red.shade100;
+    }
+
+    return Colors.grey.shade200;
   }
 
-  Color getStatusTextColor(String? status, [String? leaveType]) {
-    if (leaveType != null && leaveType.isNotEmpty) return Colors.blue.shade800;
-    switch (status?.toUpperCase() ?? '') {
-      case 'P':
-        return Colors.green.shade800;
-      case 'A':
-        return Colors.red.shade800;
-      case 'H':
-        return Colors.blue;
 
-      case 'W':
-        return Colors.orange.shade800;
 
-      default:
-        return Colors.black87;
+  Color getStatusTextColor(String? ms, String? status, String? leaveType) {
+    ms = ms ?? "";
+    status = status ?? "";
+    leaveType = leaveType ?? "";
+
+
+    if (leaveType == "Leave Without Pay") {
+      return Colors.red.shade800;
     }
+
+
+    if (leaveType.isNotEmpty) {
+      return Colors.blue.shade800;
+    }
+
+
+    if (["W", "WH"].contains(ms)) {
+      return Colors.orange.shade800;
+    }
+
+
+    if (["H", "HW"].contains(ms)) {
+      return Colors.blue.shade900;
+    }
+
+
+    if (ms == "HD" || status == "Half Day") {
+      return Colors.amber.shade900;
+    }
+
+
+    if (["P", "PW", "PH", "WH", "HW"].contains(ms)) {
+      return Colors.green.shade800;
+    }
+
+
+    if (["A", "XX", "LH", "E"].contains(ms)) {
+      return Colors.red.shade800;
+    }
+
+    return Colors.black87;
   }
+
 
   // Summary card widget with tap for filtering
   Widget summaryCard(String title, String count, Color bgColor, Color textColor,
@@ -272,7 +326,7 @@ class AttendanceScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo.shade600,
+                      backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
@@ -295,6 +349,7 @@ class AttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       appBar: AppBar(
         title: const Text('Attendance Summary'),
         centerTitle: true,
@@ -318,6 +373,7 @@ class AttendanceScreen extends StatelessWidget {
 
 
         return Padding(
+
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
@@ -386,10 +442,10 @@ class AttendanceScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: getStatusColor(data.minopStatus, data.leaveType),
+                        color: getStatusColor(data.minopStatus, data.status,data.leaveType),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: getStatusTextColor(data.minopStatus, data.leaveType)
+                          color: getStatusTextColor(data.minopStatus, data.status,data.leaveType)
                               .withOpacity(0.3),
                         ),
                       ),
@@ -446,10 +502,38 @@ class AttendanceScreen extends StatelessWidget {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: getStatusTextColor(
-                                        data.minopStatus, data.leaveType),
+                                        data.minopStatus, data.status,data.leaveType),
                                   ),
                                 ),
-                                if (data.leaveType != null &&
+                              data.minopStatus == 'HD'
+                                  ? Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white70,
+                                  borderRadius:
+                                  BorderRadius.circular(4),
+                                  border: Border.all(
+                                      color: getStatusTextColor(
+                                          data.minopStatus,data.status,
+                                          data.leaveType)),
+                                ),
+                                child: Text(
+                                  "HD",
+                                  style:  TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: getStatusTextColor(
+                                        data.minopStatus,data.status,
+                                        data.leaveType),
+                                  ),
+                                ),
+                              )
+                                  : SizedBox(),
+
+
+
+                              if (data.leaveType != null &&
                                     data.leaveType!.isNotEmpty)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -460,7 +544,7 @@ class AttendanceScreen extends StatelessWidget {
                                       BorderRadius.circular(4),
                                       border: Border.all(
                                           color: getStatusTextColor(
-                                              data.minopStatus,
+                                              data.minopStatus,data.status,
                                               data.leaveType)),
                                     ),
                                     child: Text(
@@ -469,7 +553,7 @@ class AttendanceScreen extends StatelessWidget {
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
                                         color: getStatusTextColor(
-                                            data.minopStatus,
+                                            data.minopStatus,data.status,
                                             data.leaveType),
                                       ),
                                     ),

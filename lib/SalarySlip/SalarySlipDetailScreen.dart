@@ -230,7 +230,7 @@ class SalarySlipDetailScreen extends StatelessWidget {
                     const Text(
                       'Net Salary',
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

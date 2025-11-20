@@ -250,7 +250,7 @@ String formatDate(DateTime date) {
 
 Future<dynamic> apiSalarySlipList({DateTime? fromDate, DateTime? toDate}) async {
   final String EmployeeCode = box.read('employee_code');
-  final sid = box.read(SID);
+
   final String fromDateStr = fromDate != null ? formatDate(fromDate) : '';
   final String toDateStr = toDate != null ? formatDate(toDate) : '';
   String baseUrl = "$URLGetSalarySlip?employee_code=$EmployeeCode&from_date=$fromDateStr&to_date=$toDateStr";

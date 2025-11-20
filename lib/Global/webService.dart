@@ -11,6 +11,9 @@ const String URLOTPVerification =
 const String URLGetMenu =
     SUB_BASE_URL + "erp_mobile.api.masterdata.check_serial_no";
 
+const String GetQRDetails =
+    SUB_BASE_URL + "erp_mobile.api.masterdata.get_qr_details";
+
 const String URLGetProfile =
     SUB_BASE_URL + "erp_mobile.api.masterdata.get_user_profile";
 

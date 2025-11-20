@@ -6,6 +6,8 @@ import 'SalarySlipDetailScreen.dart'; // ✅ add this import
 import 'dart:io'; // ✅ Required for File
 import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class SalarySlipList extends StatefulWidget {
   const SalarySlipList({super.key});
@@ -35,35 +37,51 @@ class _SalarySlipListState extends State<SalarySlipList> {
     // Initial load
     loadSalarySlips();
   }
-
   void loadSalarySlips() {
     if (serviceCall) return;
+
     setState(() => serviceCall = true);
 
     apiSalarySlipList(fromDate: fromDate, toDate: toDate).then((response) {
-      serviceCall = false;
-      if (response.runtimeType != bool) {
-        setState(() {
-          itemsAll = response;
-          items = response;
-        });
-      } else {
-        setState(() {});
+      setState(() => serviceCall = false);
+
+      if (response == null) {
+        // API returned null
+        itemsAll = [];
+        items = [];
+        return;
       }
+
+      if (response is bool) {
+        // API returned false
+        itemsAll = [];
+        items = [];
+        return;
+      }
+
+      if (response is List) {
+        // API returned correct list
+        itemsAll = response;
+        items = response;
+        return;
+      }
+
+      // Anything else (Map, String, etc.)
+      itemsAll = [];
+      items = [];
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
-
         centerTitle: true,
         title: const Text(
           'Salary Slip',
           style: TextStyle(
-            color: appBlack,
+        
 
             fontSize: 18,
           ),
@@ -113,104 +131,170 @@ class _SalarySlipListState extends State<SalarySlipList> {
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
-  /// --- FILTER DIALOG ---
+
   void showFilterDialog() {
     DateTime? tempFrom = fromDate;
     DateTime? tempTo = toDate;
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 10,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with X button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Filter Salary Slips",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87),
-                  ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        shape: BoxShape.circle,
-                      ),
-                      padding: const EdgeInsets.all(6),
-                      child: const Icon(
-                        Icons.close,
-                        size: 20,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 20),
+              backgroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Filter Salary Slips",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.black54),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
 
-              // Date pickers
-              _buildDatePicker("From Date", tempFrom, (date) => tempFrom = date),
-              const SizedBox(height: 15),
-              _buildDatePicker("To Date", tempTo, (date) => tempTo = date),
-              const SizedBox(height: 25),
+                    // FROM DATE
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: tempFrom ?? DateTime.now(),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setStateDialog(() => tempFrom = picked);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 3,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "From: ${tempFrom != null ? DateFormat('dd-MM-yyyy').format(tempFrom!) : '--/--/----'}",
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+                          ],
+                        ),
+                      ),
+                    ),
 
-              // Apply button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      fromDate = tempFrom;
-                      toDate = tempTo;
-                      loadSalarySlips();
-                    });
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                  ),
-                  child: Ink(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF4CAF50), Color(0xFF66BB6A)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                    // TO DATE
+                    GestureDetector(
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: tempTo ?? (tempFrom ?? DateTime.now()),
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) {
+                          setStateDialog(() => tempTo = picked);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade300),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 3,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "To: ${tempTo != null ? DateFormat('dd-MM-yyyy').format(tempTo!) : '--/--/----'}",
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Icon(Icons.calendar_today_outlined, color: Colors.grey),
+                          ],
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Container(
-                      alignment: Alignment.center,
-                      constraints: const BoxConstraints(minHeight: 48),
-                      child: const Text(
-                        "Apply",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+
+                    // APPLY BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            fromDate = tempFrom;
+                            toDate = tempTo;
+                            loadSalarySlips();
+                          });
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.check_circle_outline),
+                        label: const Text(
+                          "Apply Filter",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:Colors.blueAccent,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 3,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
+
 
 
 
@@ -307,7 +391,7 @@ class _SalarySlipListState extends State<SalarySlipList> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

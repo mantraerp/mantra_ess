@@ -444,8 +444,8 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                   onPressed: toggleSelectAll,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.blueAccent,
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    foregroundColor: Colors.black,
+
                   ),
                 ),
 
@@ -512,6 +512,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     },
                     leading: Checkbox(
                       value: parentSelected,
+                      activeColor: appBlack,
                       onChanged: (val) {
                         setState(() {
                           if (val == true) {
@@ -566,6 +567,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               children: [
                                 Checkbox(
                                   value: isSelected,
+                                  activeColor: Colors.black,
                                   onChanged: (val) {
                                     setState(() {
                                       if (val == true) {

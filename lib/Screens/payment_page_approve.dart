@@ -321,8 +321,8 @@ class _PaymentPageState extends State<PaymentApprovePage> {
                   ),
                   onPressed: toggleSelectAll,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.blueAccent,
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    foregroundColor: Colors.black,
+
                   ),
                 ),
 
@@ -373,6 +373,7 @@ class _PaymentPageState extends State<PaymentApprovePage> {
                     },
                     leading: Checkbox(
                       value: parentSelected,
+                      activeColor: appBlack,
                       onChanged: (val) {
                         setState(() {
                           if (val == true) {
@@ -427,6 +428,7 @@ class _PaymentPageState extends State<PaymentApprovePage> {
                               children: [
                                 Checkbox(
                                   value: isSelected,
+                                  activeColor: appBlack,
                                   onChanged: (val) {
                                     setState(() {
                                       if (val == true) {
@@ -470,8 +472,8 @@ class _PaymentPageState extends State<PaymentApprovePage> {
                             ),
                             const SizedBox(height: 4),
                             Wrap(
-                              spacing: 8, // horizontal space between buttons
-                              runSpacing: 6, // vertical space when wrapping
+                              spacing: 5, // horizontal space between buttons
+                              runSpacing: 4, // vertical space when wrapping
                               alignment: WrapAlignment.end,
                               children: [
                                 OutlinedButton(

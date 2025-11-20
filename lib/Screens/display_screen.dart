@@ -33,7 +33,7 @@ class DataDisplayScreen extends StatelessWidget {
           ),
           color:Colors.white,
           elevation: 6,
-          shadowColor: Colors.blue.withOpacity(0.3),
+
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: ListView.builder(

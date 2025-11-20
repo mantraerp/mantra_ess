@@ -186,10 +186,10 @@ class _BatchDetailsPageState extends State<BatchDetailsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (batchData.isNotEmpty) ...[
-              sectionHeader(Icons.inventory_2, 'Item Information', Colors.grey),
+              sectionHeader(Icons.inventory_2, 'Item Information', Colors.blueAccent),
               ...batchData.map<Widget>((e) => buildBatchCard(e)).toList()],
               if (trackData.isNotEmpty) ...[
-              sectionHeader(Icons.description, 'Document History', Colors.grey),
+              sectionHeader(Icons.description, 'Document History', Colors.blueAccent),
               ...trackData.map<Widget>((e) => buildTrackCard(e)).toList(),
               const SizedBox(height: 20)
             ],
