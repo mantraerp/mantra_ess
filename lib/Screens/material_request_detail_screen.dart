@@ -253,11 +253,7 @@ class _MaterialRequestDetailScreenState extends State<MaterialRequestDetailScree
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.15), Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(

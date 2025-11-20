@@ -346,7 +346,7 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
                           },
                           child: const Text(
                             "Apply Filters",
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16,color:Colors.white),
                           ),
                         ),
                       ),
@@ -389,7 +389,7 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
             items: items
                 .map((e) => DropdownMenuItem<String>(
               value: e,
-              child: Text(e, overflow: TextOverflow.ellipsis),
+              child: Text(e, overflow: TextOverflow.visible,softWrap: true),
             ))
                 .toList(),
             onChanged: onChanged,
@@ -481,6 +481,33 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
       }
     }
 
+    if (uniqueItems.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
+          const SizedBox(height: 6),
+          Container(
+            height: 52,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade400),
+              color: Colors.grey.shade100,
+            ),
+            child: Text(
+              "No $label available",
+              style: const TextStyle(color: Colors.grey),
+            ),
+
+          )
+        ],
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -499,7 +526,8 @@ class _PaymentFilterScreenState extends State<PaymentFilterScreen> {
                 value: e,
                 child: Text(
                   e[displayKey]?.toString() ?? '',
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
             )

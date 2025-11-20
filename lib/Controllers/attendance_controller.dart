@@ -77,26 +77,55 @@ class AttendanceController extends GetxController {
     }
   }
 
-  // 🔹 Utility: Filtered attendance list based on filterStatus
+
   List<AttendanceRecord> getFilteredList() {
     if (filterStatus.value == 'All') return attendanceList;
+
     return attendanceList.where((att) {
+      String ms = att.minopStatus ?? "";
+      String status = att.status ?? "";
+      String leave = att.leaveType ?? "";
+
       switch (filterStatus.value) {
         case 'Present':
-          return att.minopStatus == 'P';
+          return (["P","PW","PH","HW"].contains(ms) && status == "Present")
+              || (["P","PW","PH","WH","HW"].contains(ms) && status.isEmpty);
+
         case 'Week-off':
-          return att.minopStatus == 'W';
-        case 'Absent':
-          return att.minopStatus == 'A';
+          return ["W","WH"].contains(ms);
+
         case 'Half Day':
-          return att.minopStatus == 'PW';
+          return
+            (["P","PW","PH","W","WH","H","HW"].contains(ms) && status == "Half Day") ||
+                (ms == "HD") ||
+                (["A","XX","LH","E"].contains(ms) &&
+                    leave.isNotEmpty && leave != "Leave Without Pay" &&
+                    status == "Half Day");
+        case 'Absent':
+          return
+            (["A","XX","E"].contains(ms)) ||
+                (ms == "LH" && status == "Absent" && leave != "Leave Without Pay") ||
+                (["P","PW","PH","W","WH","H","HW"].contains(ms) &&
+                    status == "On Leave" && leave == "Leave Without Pay") ||
+                (ms == "HD" && leave == "Leave Without Pay");
+
         case 'On Leave':
-          return att.leaveType != null && att.leaveType!.isNotEmpty;
+          return
+            (["TL","CL","SL","WL","ML","BL","BR","LL","CO","EL","OD","LC"]
+                .contains(ms)) ||
+                (ms == "HD" && leave != "Leave Without Pay") ||
+                (["A","XX","LH","E"].contains(ms) &&
+                    leave.isNotEmpty && leave != "Leave Without Pay" &&
+                    status == "Present") ||
+                (["P","PW","PH","WH","HW"].contains(ms) &&
+                    status == "On Leave" &&
+                    leave.isNotEmpty && leave != "Leave Without Pay");
         default:
           return true;
       }
     }).toList();
   }
+
 
   // 🔹 Helper: Compare dates ignoring time
   bool isSameDate(DateTime a, DateTime b) {
