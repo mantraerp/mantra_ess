@@ -1,5 +1,14 @@
 import 'dart:convert';
 
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:pdfx/pdfx.dart';
+
+import 'package:url_launcher/url_launcher.dart';
+
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -14,6 +23,10 @@ import 'package:mantra_ess/Models/profile_model.dart';
 import 'package:mantra_ess/Models/purchase_order_model.dart';
 import 'package:mantra_ess/Models/sales_order_model.dart';
 import 'package:mantra_ess/Screens/profile_screen.dart';
+import 'package:mantra_ess/Screens/po_approval_form_details.dart';
+import 'package:mime/mime.dart';
+import 'package:open_filex/open_filex.dart';
+
 
 import 'appWidget.dart';
 import 'dart:io';
@@ -26,10 +39,65 @@ import 'package:mantra_ess/SerialNumberDetails/ShowSerialNumberDetails.dart';
 
 import '../Login/loginPage.dart';
 import '../SerialNumberDetails/ErrorMessage.dart';
+
+
 const jsonGlobal = JsonCodec();
 final navigatorKey = GlobalKey<NavigatorState>();
 final box = GetStorage();
 
+Widget filePreviewDialog({
+  required BuildContext context,
+  required String title,
+  required Widget content,
+}) {
+  return Dialog(
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+    ),
+    insetPadding: EdgeInsets.all(16),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Header
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.blueAccent,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Icon(Icons.close, color: Colors.white),
+              ),
+            ],
+          ),
+        ),
+
+        // Content
+        Container(
+          height: 500,
+          padding: EdgeInsets.all(12),
+          child: content,
+        ),
+      ],
+    ),
+  );
+}
 
 
 Future<File?> downloadAndSavePDF(String slipName) async {
@@ -88,6 +156,92 @@ Future<File?> downloadAndSavePDF(String slipName) async {
   }
 }
 
+Future<void> openNDAInDialog(BuildContext context, String fileUrl) async {
+  try {
+    final ext = fileUrl.split('.').last.toLowerCase();
+    final downloadUrl = "$GetGlobalFileDownload?file_url=$fileUrl";
+
+    final res = await http.get(Uri.parse(downloadUrl), headers: headers);
+
+    switch (res.statusCode) {
+      case 403:
+        return showAlert("Permission Denied", "You do not have permission to view this file.");
+      case 404:
+        return showAlert("File Not Found", "The requested file does not exist.");
+      case 417:
+        return showAlert("Error", "Something went wrong while downloading the file.");
+      case 200:
+        break;
+      default:
+        return showAlert("Error", "Unexpected error: ${res.statusCode}");
+    }
+
+    final bytes = res.bodyBytes;
+    final dir = await getTemporaryDirectory();
+    final filePath = "${dir.path}/preview.$ext";
+
+    await File(filePath).writeAsBytes(bytes);
+
+    // Preview PDF
+    if (ext == 'pdf') {
+      showDialog(
+        context: context,
+        builder: (ctx) => filePreviewDialog(
+          context: ctx,
+          title: "Preview PDF",
+          content: PdfViewPinch(
+            controller: PdfControllerPinch(
+              document: PdfDocument.openFile(filePath),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
+    // Preview Image
+    if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].contains(ext)) {
+      showDialog(
+        context: context,
+        builder: (ctx) => filePreviewDialog(
+          context: ctx,
+          title: "Preview Image",
+          content: Image.file(File(filePath), fit: BoxFit.contain),
+        ),
+      );
+      return;
+    }
+
+    // DOCX or other unsupported formats → download & open using default app
+    await OpenFilex.open(filePath);
+
+  } catch (e) {
+    showAlert("Failed", e.toString());
+  }
+}
+
+
+
+Future<void> openNDAWithUrlLauncher(BuildContext context, String fileUrl) async {
+  try {
+    final uri = Uri.parse(fileUrl);
+
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (!launched) {
+      showAlert("Error", "Could not open the link.");
+    }
+  } catch (e) {
+    showAlert("Failed", e.toString());
+  }
+}
+
+
+
+
 
 
 dynamic _handleFailResponse(dynamic response) {
@@ -128,6 +282,9 @@ Future<dynamic> apiLogin() async {
   int statusCode = response.statusCode;
 
   if (statusCode == 200) {
+    final box = GetStorage();
+    await box.remove("cached_po_list");
+
     final res = jsonDecode(response.body);
     if (res.keys.contains('allowed_screens')) {
       box.write(ALLOWED_SCREEN, res['allowed_screens']);

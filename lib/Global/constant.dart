@@ -51,3 +51,4 @@ late final SharedPreferences prefsGlobal;
 final String ALLOWED_SCREEN = 'allowed_screens';
 final String SID = 'sid';
 Map<dynamic,dynamic> globle_user_detail = {};
+const String CachedPurchaseOrders = "cached_po_list";

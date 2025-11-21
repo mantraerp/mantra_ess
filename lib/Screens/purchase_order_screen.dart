@@ -27,8 +27,17 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
   bool _isPaginating = false;
   bool _hasMore = true;
   String _errorMessage = "";
+  int _trackSeen = 0;
+  int seen=0;
+  bool _canRead = false;
+  bool _canCreate = false;
+
+
 
   final ScrollController _scrollController = ScrollController();
+  int _start = 0;
+  final int _limit = 10;
+
 
   // Filters
   late String fromDate;
@@ -42,33 +51,82 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
   @override
   void initState() {
     super.initState();
+
+
     final now = DateTime.now();
-    final last60Days = now.subtract(const Duration(days: 60)); // Last 60 days
+    final last60Days = now.subtract(const Duration(days: 30)); // Last 60 days
     fromDate = DateFormat('yyyy-MM-dd').format(last60Days);
     toDate = DateFormat('yyyy-MM-dd').format(now);
+    final cached = box.read("cached_po_list");
+
+    if ((cached != null && (cached as List).isNotEmpty) && _searchText.isEmpty) {
+      setState(() {
+        _purchaseOrders =
+            (cached as List).map((e) => PurchaseOrderRecord.fromJson(e)).toList();
+        _isLoading = false;
+        _start = _purchaseOrders.length;
+        _hasMore = true;
+      });
+      if (_purchaseOrders.length < _limit) {
+        _fetchPurchaseOrders(isRefresh: false);
+      }
+
+    }
+    else {
+
+      _fetchPurchaseOrders(isRefresh: true);
+    }
 
     _fetchStatusOptions();
-    _fetchPurchaseOrders(isRefresh: widget.refresh ? widget.refresh : true);
+
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200 &&
-          !_isPaginating) {
+          _scrollController.position.maxScrollExtent - 100 && _hasMore) {
         _loadMore();
       }
     });
+
   }
+
+  Future<void> _checkPermissions() async {
+    try {
+      final sid = box.read(SID);
+
+      final readResp = await http.get(
+        Uri.parse("$CheckPermissionUrl?doctype=Purchase Order&ptype=read"),
+        headers: headers,
+      );
+      final createResp = await http.get(
+        Uri.parse("$CheckPermissionUrl?doctype=Purchase Order&ptype=create"),
+        headers: headers,
+      );
+
+      final read = json.decode(readResp.body);
+      final create = json.decode(createResp.body);
+
+      setState(() {
+        _canRead = read["has_perm"] == 1;
+        _canCreate = create["has_perm"] == 1;
+      });
+    } catch (e) {
+      debugPrint("Permission Error: $e");
+    }
+  }
+
 
   Future<void> _fetchStatusOptions() async {
     try {
-      final sid = box.read(SID);
+
       final response = await http.get(
         Uri.parse(GetPurchaseOrderStatus),
         headers: headers,
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
         setState(() {
+          _trackSeen = data["track_seen"] ?? 0;
           _statusOptions = ["All"];
           _statusOptions.addAll(List<String>.from(data["data"] ?? []));
         });
@@ -100,6 +158,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     if (isRefresh) {
       _purchaseOrders.clear();
       _hasMore = true;
+      _start = 0;
     }
     if (!_hasMore && !isRefresh) return;
 
@@ -114,7 +173,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
       String fromStr = DateFormat('dd-MM-yyyy').format(DateTime.parse(fromDate));
       String toStr = DateFormat('dd-MM-yyyy').format(DateTime.parse(toDate));
 
-      String url = "$GetPurchaseOrders?from_date=$fromStr&to_date=$toStr";
+      String url = "$GetPurchaseOrders?from_date=$fromStr&to_date=$toStr&start=$_start";
       if (selectedStatus != null && selectedStatus != "All") {
         url += "&status=${Uri.encodeComponent(selectedStatus!)}";
       }
@@ -130,27 +189,45 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final poData = data["data"]?["purchase_orders"] ?? [];
+
         final poResponse = PurchaseOrderResponse.fromJson({
           "message": data["message"],
           "data": poData,
           "status_code": data["status_code"]
         });
-        setState(() {
-          final existingNames = _purchaseOrders.map((e) => e.name).toSet();
-          final newItems =
-          poResponse.data.where((e) => !existingNames.contains(e.name)).toList();
 
+        setState(() {
+          final List<PurchaseOrderRecord> fetched = poResponse.data;
+
+
+          final existing = _purchaseOrders.map((e) => e.name).toSet();
+          final newItems =
+          fetched.where((e) => !existing.contains(e.name)).toList();
           if (isRefresh) {
-            _purchaseOrders = poResponse.data;
+            _purchaseOrders = newItems;
+            _start = fetched.length;
           } else {
             _purchaseOrders.addAll(newItems);
+            _start += fetched.length;
           }
 
-          if (poResponse.data.isEmpty || newItems.isEmpty) _hasMore = false;
+          _hasMore = fetched.length >= _limit;
+
+          box.write(
+            "cached_po_list",
+            _purchaseOrders.map((e) => e.toJson()).toList(),
+          );
+
           _isLoading = false;
           _isPaginating = false;
         });
-      } else {
+        // Auto-load more if not enough cards to scroll
+        if (_purchaseOrders.length < _limit && _hasMore) {
+          _loadMore();
+        }
+
+      }
+      else {
         setState(() {
           _hasError = true;
           _errorMessage = "Failed to fetch (${response.statusCode})";
@@ -166,9 +243,14 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
     }
   }
 
-  void _loadMore() {
-    if (!_isPaginating && _hasMore && !_isLoading) _fetchPurchaseOrders();
-  }
+
+    void _loadMore() {
+
+      if (!_hasMore) return;
+      _fetchPurchaseOrders(isRefresh: false);
+    }
+
+
 
   Future<void> _showFilterDialog() async {
     await showDialog(
@@ -267,6 +349,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
                   ),
                   const SizedBox(width: 10),
                   // ➕ Add Button
+                  if (_canCreate)
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -292,7 +375,7 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
           ),
         ),
 
-      body: _isLoading
+      body:_isLoading
           ? const Center(child: CircularProgressIndicator())
           : _hasError
           ? Center(child: Text(_errorMessage))
@@ -320,13 +403,25 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
                   borderRadius: BorderRadius.circular(16)),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        PurchaseOrderDetailScreen(purchaseOrderName: dn.name),
-                  ),
-                ),
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PurchaseOrderDetailScreen(purchaseOrderName: dn.name),
+                    ),
+                  );
+
+                  // After returning — mark seen locally
+                  setState(() {
+                    dn.seen = 1;
+                  });
+
+                  // Update local cache also
+                  box.write(
+                    "cached_po_list",
+                    _purchaseOrders.map((e) => e.toJson()).toList(),
+                  );
+                },
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
@@ -344,6 +439,16 @@ class _PurchaseOrderListScreenState extends State<PurchaseOrderListScreen> {
                                   color: Colors.black87),
                             ),
                           ),
+                          if (_trackSeen == 1 && dn.seen == 0)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
                           Container(
                             width: 100,
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

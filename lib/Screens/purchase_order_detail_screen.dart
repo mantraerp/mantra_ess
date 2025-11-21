@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mantra_ess/Global/constant.dart';
+import 'package:mantra_ess/Screens/po_approval_form_details.dart';
+import 'package:mantra_ess/Screens/purchase_order_screen.dart';
+import 'package:mantra_ess/Screens/toast_helper.dart';
 import '../Global/webService.dart';
 import 'items_screen.dart';
 import 'tax_and_charges.dart';
 import 'activity_log_screen.dart';
+import 'purchase_invoice_screen.dart';
 
 class PurchaseOrderDetailScreen extends StatefulWidget {
   final String purchaseOrderName;
@@ -124,6 +128,90 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
     if (content.toLowerCase().contains("changed")) return Colors.green;
     return Colors.orange;
   }
+  Future<void> _performTransition(String action) async {
+    if (poDetail == null) return;
+
+    final purchaseOrderName = widget.purchaseOrderName;
+    final url = Uri.parse(
+        "$AppliedPurchaseOrderAction?purchase_order=$purchaseOrderName&action=$action");
+
+    // Show loading
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final response = await http.post(url, headers: headers); // Use POST as backend expects
+
+
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final message = data['message'] ?? "Transition completed";
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PurchaseOrderListScreen(refresh: true),
+          ),
+        );
+        ToastUtils.show(context,message);
+
+
+      }
+      else if(response.statusCode == 409){
+        final data = json.decode(response.body);
+        final message = data['message'] ?? "Error: ${response.statusCode}";
+        ToastUtils.show(context,message);
+        Navigator.pop(context);
+
+      }
+      else {
+        final data = json.decode(response.body);
+        final message = data['message'] ?? "Error: ${response.statusCode}";
+        ToastUtils.show(context,message);
+        Navigator.pop(context);
+
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      ToastUtils.show(context,"Exception: $e");
+
+
+    }
+  }
+
+
+  Future<void> _confirmAndPerformTransition(String action) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Action Confirm"),
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.pop(context, false),
+            ),
+          ],
+        ),
+        content: Text("Are you sure you want to $action this Purchase Order?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Yes"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      _performTransition(action);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +267,65 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: () {
+                  if (poDetail != null && poDetail!['details'] != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => POApprovalDetailsScreen(
+                            details: poDetail!['details'],
+                            currency:poDetail!['currency']
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  "Details",
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
+              ),
+            ),
+            if (poDetail?['transitions'] != null &&
+                (poDetail!['transitions'] as List).isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: (poDetail!['transitions'] as List)
+                    .map<Widget>((t) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: () =>
+                        _confirmAndPerformTransition(t['action']),
+                    child: Text(
+                      t['action'],
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
+                  ),
+                ))
+                    .toList(),
+              ),
+
+
+
+
+
+
+
 
             const SizedBox(height: 10),
 
@@ -237,7 +383,10 @@ class _PurchaseOrderDetailScreenState extends State<PurchaseOrderDetailScreen> {
           ],
         ),
       ),
+
     );
+
+
   }
 
 
