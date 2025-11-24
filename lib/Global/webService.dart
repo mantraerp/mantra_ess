@@ -47,12 +47,22 @@ const String URLLogout = SUB_BASE_URL + "logout";
 const String URLGetSalarySlip =
     SUB_BASE_URL + "erp_mobile.api.masterdata.get_salary_slips";
 
+const String GetGlobalFileDownload=
+    SUB_BASE_URL + "erp_mobile.api.masterdata.download_file";
+
+
 
 const String DownloadSalarySlip =
     SUB_BASE_URL + "erp_mobile.api.masterdata.download_salary_slip";
 
 const String GetPurchaseOrders =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.get_purchase_orders";
+
+const String CheckPermissionUrl =
+    SUB_BASE_URL + "erp_mobile.api.masterdata.check_perm";
+
+const String AppliedPurchaseOrderAction =
+    SUB_BASE_URL + "erp_mobile.api.purchase_order.make_transition";
 
 const String CreatePurchaseOrder =
     SUB_BASE_URL + "erp_mobile.api.purchase_order.create_purchase_order";

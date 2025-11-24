@@ -42,6 +42,7 @@ class PurchaseOrderRecord {
   String? status;
   double? grandTotal;
   String? currency;
+  int seen;
 
   PurchaseOrderRecord({
     required this.name,
@@ -50,6 +51,7 @@ class PurchaseOrderRecord {
     this.status,
     this.grandTotal,
     this.currency,
+    this.seen = 0,
   });
 
   factory PurchaseOrderRecord.fromJson(Map<String, dynamic> json) =>
@@ -62,7 +64,13 @@ class PurchaseOrderRecord {
             ? json["grand_total"].toDouble()
             : 0.0,
         currency: json["currency"],
+        seen: (json["seen"] ?? 0) is int
+            ? (json["seen"] ?? 0)
+            : int.tryParse("${json["seen"]}") ?? 0,
+
       );
+
+
 
   Map<String, dynamic> toJson() => {
     "name": name,
@@ -71,5 +79,6 @@ class PurchaseOrderRecord {
     "status": status,
     "grand_total": grandTotal,
     "currency": currency,
+    "seen": seen,
   };
 }
