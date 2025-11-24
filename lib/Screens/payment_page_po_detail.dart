@@ -305,7 +305,7 @@ class _PaymentDetailScreenState extends State<PaymentDetailScreen> {
             [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Approval Details")),
+      appBar: AppBar(title: const Text("Approval Details"),centerTitle: true,),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(12),
         child: Column(

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mantra_ess/Global/constant.dart';
+import 'package:mantra_ess/Global/webService.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:mantra_ess/Global/apiCall.dart';
 
 import 'display_screen.dart';
 
@@ -78,7 +81,7 @@ class _ScannerScreenState extends State<ScannerScreen>
         isLoading = false;
       });
 
-      // small delay for MIUI / device quirks
+
       await Future.delayed(const Duration(milliseconds: 300));
       try {
         await cameraController.start();
@@ -108,9 +111,9 @@ class _ScannerScreenState extends State<ScannerScreen>
       }
 
       final apiUrl =
-          "http://192.168.11.66:8014/api/method/erp_mobile.api.masterdata.get_qr_details?data=$nameValue";
+          "$GetQRDetails?data=$nameValue";
 
-      final response = await http.get(Uri.parse(apiUrl));
+      final response = await http.get(Uri.parse(apiUrl),headers:headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

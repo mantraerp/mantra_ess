@@ -88,7 +88,7 @@ class _SerialDetailsPageState extends State<SerialDetailsPage> {
             children: [
               // 🔹 Show "Item Information" section only if serialData has data
               if (serialData.isNotEmpty) ...[
-                sectionHeader(Icons.inventory_2, 'Item Information', Colors.grey),
+                sectionHeader(Icons.inventory_2, 'Item Information', Colors.blueAccent),
                 const SizedBox(height: 8),
                 ...serialData.map<Widget>((e) => _buildItemCard(e)).toList(),
                 const SizedBox(height: 20),
@@ -96,7 +96,7 @@ class _SerialDetailsPageState extends State<SerialDetailsPage> {
 
               // 🔹 Show "Document History" section only if trackData has data
               if (trackData.isNotEmpty) ...[
-                sectionHeader(Icons.description, 'Document History', Colors.grey),
+                sectionHeader(Icons.description, 'Document History', Colors.blueAccent),
                 const SizedBox(height: 8),
                 ...trackData.map<Widget>((e) => _buildDocumentCard(e)).toList(),
                 const SizedBox(height: 20),
